@@ -1,0 +1,22 @@
+---
+- name: setup and manage nodes
+  hosts: servers
+  become: true
+  vars_files:
+    - ../vars/secrets.yml
+  tasks:
+    - name: create user ansible on managed nodes
+      user:
+        name: ansible
+    - name: set password for ansible user
+      shell:
+        cmd: echo ansible:{{ become_password }} | chpasswd
+    - name: setup user ansible with elevated priviledges
+      copy:
+        content: "ansible ALL=(ALL) PASSWD: ALL"
+        dest: /etc/sudoers.d/ansible
+    - name: copy ssh keys from control to managed nodes
+      ansible.posix.authorized_key:
+        user: ansible
+        state: present
+        key: "{{ lookup('file', '/home/mango/.ssh/id_rsa.pub') }}"
