@@ -8,12 +8,30 @@
       user:
         name: ansible
         generate_ssh_key: true
+
     - name: Create the password for the control user
       shell:
         cmd: echo {{ become_password }} | passwd --stdin ansible
       when: ansible_os_family == 'RedHat'
       #when: ansible_facts['ansible_os_family'] == 'RedHat'
+      
     - name: install chpasswd on debian family os
       shell:
         cmd: echo ansible:{{ become_password  }} | chpasswd
       when: ansible_os_family == 'Debian'
+
+    - name: give the user elevated priviledges
+      copy:
+        content: "ansible ALL=(ALL) NOPASSWD: ALL"
+        dest: /etc/sudoers.d/ansible
+
+    - name: add the user to the specified groups
+      user:
+        name: ansible
+        append: true
+        groups: 
+          - kvm
+          - libvirt
+
+
+
