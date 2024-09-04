@@ -1,0 +1,22 @@
+minimal_debian_packages:
+  - gcc
+  - g++
+  - git
+  - vim-nox
+  - zip
+  - unzip
+  - zsh
+  - ack-grep
+  - automake
+  - weechat-curses
+  - mutt
+  - ufw
+  - htop
+  - golang
+  - silversearcher-ag
+  - ncdu
+  - tmux
+  - taskwarrior
+  - clang
+  - screenfetch
+  - build-essential

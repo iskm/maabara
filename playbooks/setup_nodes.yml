@@ -4,6 +4,7 @@
   become: true
   vars_files:
     - ../vars/secrets.yml
+    - ../vars/packages.yml
   tasks:
     - name: create user ansible on managed nodes
       user:
@@ -20,3 +21,10 @@
         user: ansible
         state: present
         key: "{{ lookup('file', '/home/mango/.ssh/id_rsa.pub') }}"
+
+    - name: Core packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ minimal_debian_packages }}"
+

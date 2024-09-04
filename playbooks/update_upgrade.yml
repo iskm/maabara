@@ -8,6 +8,7 @@
     - name: update package index on all machines
       ansible.builtin.apt:
         update_cache: yes
+
     - name: Upgrade all packages to latest version
       ansible.builtin.apt:
         name: "*"
