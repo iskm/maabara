@@ -8,8 +8,15 @@
     - name: update package index on all machines
       ansible.builtin.apt:
         update_cache: yes
+      notify: reboot
 
     - name: Upgrade all packages to latest version
       ansible.builtin.apt:
         name: "*"
         state: latest
+      notify: reboot
+
+  handlers:
+    - name: reboot
+      ansible.builtin.reboot:
+        test_command: whoami
