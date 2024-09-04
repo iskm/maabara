@@ -1,0 +1,13 @@
+---
+- name: template functionality tests
+  hosts: all
+  become: yes
+  tasks:
+    - name: say hello
+      debug:
+        var: hostvars[inventory_hostname]['ansible_facts']['default_ipv4']['address']
+    - name: create /etc/hosts.test
+      template:
+        src: ../templates/hosts.j2
+        dest: /etc/hosts.test
+        mode: '0644'
