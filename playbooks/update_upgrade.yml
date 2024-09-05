@@ -1,6 +1,6 @@
 ---
 - name: Updates all managed servers
-  hosts: all
+  hosts: servers
   become: true
   vars:
     group_vars: groups_vars/servers.yml
@@ -8,7 +8,6 @@
     - name: update package index on all machines
       ansible.builtin.apt:
         update_cache: yes
-      notify: reboot
 
     - name: Upgrade all packages to latest version
       ansible.builtin.apt:
@@ -16,7 +15,27 @@
         state: latest
       notify: reboot
 
+    - name: Upgrade pihole on dns using docker compose
+      community.docker.docker_compose:
+        project_src: /home/pollen/pihole
+        state: present
+        recreate: always
+
+
   handlers:
     - name: reboot
       ansible.builtin.reboot:
         test_command: whoami
+
+- name: this updates the control node
+  hosts: localhost
+  become: true
+  tasks:
+    - name: update package index on local machine
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: update all packages to latest version
+      ansible.builtin.apt:
+        name: "*"
+        state: latest
