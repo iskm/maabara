@@ -15,12 +15,6 @@
         state: latest
       notify: reboot
 
-    - name: Upgrade pihole on dns using docker compose
-      community.docker.docker_compose:
-        project_src: /home/pollen/pihole
-        state: present
-        recreate: always
-
 
   handlers:
     - name: reboot
@@ -33,9 +27,27 @@
   tasks:
     - name: update package index on local machine
       ansible.builtin.apt:
-        update_cache: yes
+        update_cache: true
 
     - name: update all packages to latest version
       ansible.builtin.apt:
         name: "*"
         state: latest
+
+- name: Upgrade pihole on dns using docker compose
+  hosts: pihole
+  tasks:
+    - name: pull new images via docker compose
+      command:
+        cmd: docker compose -f pihole_compose.yml pull
+        chdir: /home/pollen/pihole
+
+    - name: remove the currently running container
+      command:
+        cmd: docker compose -f pihole_compose.yml down
+        chdir: /home/pollen/pihole
+
+    - name: bring back pihole container
+      command:
+        cmd: docker compose -f pihole_compose.yml up -d
+        chdir: /home/pollen/pihole

@@ -6,7 +6,7 @@ doc ansible_user=pollen
 
 [local]
 proxmox ansible_user=root
-dns ansible_user=pollen
+pihole ansible_user=pollen
 
 [servers:children]
 doc
