@@ -8,12 +8,14 @@
     - name: update package index on all machines
       ansible.builtin.apt:
         update_cache: yes
+      when: ansible_os_family == "Debian"
 
     - name: Upgrade all packages to latest version
       ansible.builtin.apt:
         name: "*"
         state: latest
       notify: reboot
+      when: ansible_os_family == "Debian"
 
 
   handlers:
@@ -51,3 +53,11 @@
       command:
         cmd: docker compose -f pihole_compose.yml up -d
         chdir: /home/pollen/pihole
+
+# work in progress for windows host
+# - name: Upgrade software on windows hosts
+#hosts: bane
+#become: true
+#tasks:
+#- name: run updates on all windows hosts
+#ansible.windows.win_whoami:

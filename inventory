@@ -8,6 +8,9 @@ doc ansible_user=pollen
 proxmox ansible_user=root
 pihole ansible_user=pollen
 
+[windows]
+bane ansible_user=ansible ansible_connection=winrm ansible_winrm_transport=basic ansible_port=5985 ansible_winrm_server_cert_validation=ignore
+
 [servers:children]
 doc
 aws
