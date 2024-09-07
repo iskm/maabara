@@ -1,0 +1,19 @@
+---
+- name: This playbook installs and setups postgresql
+  hosts: aws
+  become: true
+  tasks:
+    - name: install postgresql
+      apt:
+        name: postgresql
+        update_cache: true
+
+    - name: enable the postgresql service
+      service:
+        name: postgresql
+        enabled: true
+
+    - name: start the postgresql service
+      service:
+        name: postgresql
+        state: started
