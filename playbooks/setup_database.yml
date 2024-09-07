@@ -7,7 +7,7 @@
   vars:
     postgresql_user: gitea
     postgresql_db: giteadb
-    container_network: gitea_network
+    container_network: host
     gitea_directory: /home/ubuntu/hifadhi_kuu/gitea
   tasks:
     - name: install postgresql
@@ -79,9 +79,9 @@
         pull:
           platform: amd64
 
-    - name: create network the docker container will run in
-      community.docker.docker_network:
-        name: "{{container_network}}"
+# - name: create network the docker container will run in
+# community.docker.docker_network:
+# name: "{{container_network}}"
 
     - name: run and make persistant gitea container
       community.docker.docker_container:
@@ -105,4 +105,5 @@
           - ./config:/etc/gitea
           - /etc/timezone:/etc/timezone:ro
           - /etc/localtime:/etc/localtime:ro
+        recreate: true
         working_dir: "{{gitea_directory}}"
