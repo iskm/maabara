@@ -1,0 +1,27 @@
+---
+- name: installs and setups nginx on hosts
+  hosts: aws
+  become: true
+  vars:
+    gitea_website: gitea.kwerezigua.org
+    proxy: localhost:3000
+  tasks:
+    - name: install nginx and supporting packages
+      apt:
+        name: "{{item}}"
+        state: latest
+      loop:
+        - caddy
+        - ufw
+
+
+    - name: edit caddyfile with desired services
+      ansible.builtin.template:
+        src: ../templates/Caddyfile.j2
+        dest: /etc/caddy/Caddyfile
+
+    - name: start caddy service
+      systemd:
+        name: caddy
+        state: started
+        enabled: true
