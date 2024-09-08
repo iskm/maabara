@@ -4,6 +4,7 @@
   become: true
   vars:
     gitea_website: gitea.kwerezigua.org
+    gitea_website2: gitea.ibrahimmkusa.com
     proxy: localhost:3000
   tasks:
     - name: install nginx and supporting packages
