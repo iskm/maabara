@@ -72,38 +72,85 @@
         state: directory
         mode: '0755'
 
-    - name: install gitea container
-      community.docker.docker_image:
-        name: gitea/gitea
-        source: pull
-        pull:
-          platform: amd64
+    - name: download the gitea binary if it doesn't exist
+      ansible.builtin.get_url:
+        url: https://dl.gitea.com/gitea/1.22.2/gitea-1.22.2-linux-amd64.asc
+        dest: /home/ubuntu/hifadhi_kuu/gitea
 
-# - name: create network the docker container will run in
-# community.docker.docker_network:
-# name: "{{container_network}}"
+    - name: download the gitea binary if it doesn't exist
+      ansible.builtin.get_url:
+        url: https://dl.gitea.com/gitea/1.22.2/gitea-1.22.2-linux-amd64
+        dest: /home/ubuntu/hifadhi_kuu/gitea
+        checksum: sha256:https://dl.gitea.com/gitea/1.22.2/gitea-1.22.2-linux-amd64.sha256
 
-    - name: run and make persistant gitea container
-      community.docker.docker_container:
-        name: gitea
-        image: gitea/gitea
-        state: started
-        restart_policy: always
-        ports:
-          - "3000:3000"
-          - "2222:2222"
-        env:
-          GITEA__database__DB_TYPE=postgres
-          GITEA__database__HOST=localhost:5432
-          GITEA__database__NAME=giteadb
-          GITEA__database__USER=gitea
-          GITEA__database__PASSWD="{{postgresql_password}}"
-        networks:
-          - name: "{{container_network}}"
-        volumes:
-          - ./data:/var/lib/gitea
-          - ./config:/etc/gitea
-          - /etc/timezone:/etc/timezone:ro
-          - /etc/localtime:/etc/localtime:ro
-        recreate: false
-        working_dir: "{{gitea_directory}}"
+    - name: use shell command to execute a bunch of gpg commands to verify binary
+      ansible.builtin.shell: |
+        gpg --keyserver keys.openpgp.org --recv 7C9E68152594688862D62AF62D9AE806EC1592E2
+        gpg --verify gitea-1.22.2-linux-amd64.asc gitea-1.22.2-linux-amd64
+      args:
+        chdir: /home/ubuntu/hifadhi_kuu/gitea
+      ignore_errors: true
+      register: gpg_result
+
+    - name: display results of gpg verification for go binary
+      ansible.builtin.debug:
+        var: gpg_result
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### BELOW will be deleted
+#    - name: install gitea container
+      #community.docker.docker_image:
+        #name: gitea/gitea
+        #source: pull
+        #pull:
+          #platform: amd64
+
+## - name: create network the docker container will run in
+## community.docker.docker_network:
+## name: "{{container_network}}"
+
+    #- name: run and make persistant gitea container
+      #community.docker.docker_container:
+        #name: gitea
+        #image: gitea/gitea
+        #state: started
+        #restart_policy: always
+        #ports:
+          #- "3000:3000"
+          #- "2222:2222"
+        #env:
+          #GITEA__database__DB_TYPE=postgres
+          #GITEA__database__HOST=localhost:5432
+          #GITEA__database__NAME=giteadb
+          #GITEA__database__USER=gitea
+          #GITEA__database__PASSWD="{{postgresql_password}}"
+        #networks:
+          #- name: "{{container_network}}"
+        #volumes:
+          #- ./data:/var/lib/gitea
+          #- ./config:/etc/gitea
+          #- /etc/timezone:/etc/timezone:ro
+          #- /etc/localtime:/etc/localtime:ro
+        #recreate: false
+        #working_dir: "{{gitea_directory}}"
