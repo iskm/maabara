@@ -105,5 +105,5 @@
           - ./config:/etc/gitea
           - /etc/timezone:/etc/timezone:ro
           - /etc/localtime:/etc/localtime:ro
-        recreate: true
+        recreate: false
         working_dir: "{{gitea_directory}}"
