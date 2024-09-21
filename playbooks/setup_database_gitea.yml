@@ -95,8 +95,16 @@
     - name: display results of gpg verification for go binary
       ansible.builtin.debug:
         var: gpg_result
+      ignore_errors: true
 
 
+    - name: creates user to run gitea
+      ansible.builtin.user:
+        name: git
+        shell: /bin/bash
+        system: true
+        comment: "Gitea repo manager"
+        state: present
 
 
 
