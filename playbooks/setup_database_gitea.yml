@@ -1,5 +1,5 @@
 ---
-- name: This playbook installs and setups postgresql
+- name: This playbook installs and setups gitea along with postgresql
   hosts: aws
   become: true
   vars_files:
@@ -106,7 +106,19 @@
         comment: "Gitea repo manager"
         state: present
 
-
+    - name: create gitea core directories
+      ansible.builtin.file:
+        path: /var/lib/gitea/{{item}}
+        state: directory
+        recurse: yes
+        owner: git
+        group: git
+        mode: '0750'
+      loop:
+        - ""
+        - custom
+        - data
+        - log
 
 
 
