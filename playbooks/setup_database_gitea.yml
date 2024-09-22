@@ -120,6 +120,15 @@
         - data
         - log
 
+    - name: create gitea config directory
+      ansible.builtin.file:
+        path: /etc/gitea
+        state: directory
+        owner: root
+        group: git
+        mode: '770'
+
+
 
 
 
