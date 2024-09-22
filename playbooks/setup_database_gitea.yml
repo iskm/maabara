@@ -139,4 +139,14 @@
         remote_src: yes
         dest: /usr/local/bin/gitea
         owner: git
-        
+        mode: '0744'
+
+
+    - name: start the gitea service
+      service:
+        name: gitea
+        state: started
+        enabled: yes
+
+
+
