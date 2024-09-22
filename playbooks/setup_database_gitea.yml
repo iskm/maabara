@@ -132,3 +132,11 @@
       ansible.builtin.get_url:
         url: https://raw.githubusercontent.com/go-gitea/gitea/refs/heads/release/v1.22/contrib/systemd/gitea.service
         dest: /etc/systemd/system/gitea.service
+
+    - name: copy the gitea binary to /usr/local/bin directory
+      copy:
+        src: /home/ubuntu/hifadhi_kuu/gitea/gitea-1.22.2-linux-amd64
+        remote_src: yes
+        dest: /usr/local/bin/gitea
+        owner: git
+        
