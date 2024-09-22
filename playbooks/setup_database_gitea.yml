@@ -128,58 +128,7 @@
         group: git
         mode: '770'
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### BELOW will be deleted
-#    - name: install gitea container
-      #community.docker.docker_image:
-        #name: gitea/gitea
-        #source: pull
-        #pull:
-          #platform: amd64
-
-## - name: create network the docker container will run in
-## community.docker.docker_network:
-## name: "{{container_network}}"
-
-    #- name: run and make persistant gitea container
-      #community.docker.docker_container:
-        #name: gitea
-        #image: gitea/gitea
-        #state: started
-        #restart_policy: always
-        #ports:
-          #- "3000:3000"
-          #- "2222:2222"
-        #env:
-          #GITEA__database__DB_TYPE=postgres
-          #GITEA__database__HOST=localhost:5432
-          #GITEA__database__NAME=giteadb
-          #GITEA__database__USER=gitea
-          #GITEA__database__PASSWD="{{postgresql_password}}"
-        #networks:
-          #- name: "{{container_network}}"
-        #volumes:
-          #- ./data:/var/lib/gitea
-          #- ./config:/etc/gitea
-          #- /etc/timezone:/etc/timezone:ro
-          #- /etc/localtime:/etc/localtime:ro
-        #recreate: false
-        #working_dir: "{{gitea_directory}}"
+    - name: download gitea systemd service
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/go-gitea/gitea/refs/heads/release/v1.22/contrib/systemd/gitea.service
+        dest: /etc/systemd/system/gitea.service
