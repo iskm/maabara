@@ -1,0 +1,29 @@
+---
+- name: This playbook sets up and runs nextcloud on a debian os
+  hosts: aws
+  become: yes
+  tasks:
+    - name: Point Caddy to local nextcloud instance
+      ansible.builtin.blockinfile:
+        block: |
+          nextcloud.kwerezigua.org {
+            reverse_proxy localhost:11000
+          }
+        path: /etc/caddy/Caddyfile
+
+    - name: Start the Nexcloud aio container
+      community.docker.docker_container:
+        init: true
+        name: nextcloud-aio-mastercontainer
+        restart_policy: always
+        published_ports:
+          - 8080:8080
+        env:
+          APACHE_PORT=11000
+          APACHE_IP_BINDING=127.0.0.1
+        network_mode: host
+        working_dir: /home/ubuntu/hifadhi_kuu
+        volumes:
+          - /home/ubuntu/hifadhi_kuu/nextcloud/nextcloud_aio_mastercontainer:/mnt/docker-aio-config
+          - /var/run/docker.sock:/var/run/docker.sock:ro
+        image: nextcloud/all-in-one:latest
