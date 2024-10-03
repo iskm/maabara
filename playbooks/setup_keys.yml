@@ -1,0 +1,18 @@
+---
+- name: Sets up access to managed nodes on the control node
+  hosts: all
+  become: yes
+  gather_facts: true
+  tasks:
+    - name: create ansible user on managed nodes
+      ansible.builtin.user:
+        name: ansible
+        shell: /bin/bash
+        groups: sudo
+        append: yes
+
+    - name: set authorized key for ansible user
+      ansible.posix.authorized_key:
+        user: ansible
+        state: present
+        key: "{{ lookup('file', lookup('env', 'HOME') + '/.ssh/id_rsa.pub') }}"
