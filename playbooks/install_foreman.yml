@@ -1,0 +1,16 @@
+---
+- name: installs foreman on redhat 9
+  hosts: foremanAlma
+  become: yes
+  tasks:
+    - name: clean all metadata
+      ansible.builtin.command: dnf clean all
+
+    - name: clear any metadata
+      ansible.builtin.dnf:
+        name:
+          - 'https://yum.theforeman.org/releases/3.12/el9/x86_64/foreman-release.rpm'
+          - 'https://yum.theforeman.org/katello/4.14/katello/el9/x86_64/katello-repos-latest.rpm'
+          - 'https://yum.puppet.com/puppet7-release-el-9.noarch.rpm'
+        state: present
+        disable_gpg_check: true
