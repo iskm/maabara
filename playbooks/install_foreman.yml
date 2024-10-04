@@ -2,6 +2,9 @@
 - name: installs foreman on redhat 9
   hosts: foremanAlma
   become: yes
+  vars:
+    hostname: "foremanalma.homelab.local"
+    domain_name: "foremanalma.homelab.local"
   tasks:
     - name: clean all metadata
       ansible.builtin.command: dnf clean all
@@ -14,3 +17,27 @@
           - 'https://yum.puppet.com/puppet7-release-el-9.noarch.rpm'
         state: present
         disable_gpg_check: true
+
+    - name: Upgrade all packages
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+
+    - name: install foreman-installer-katello
+      ansible.builtin.dnf:
+        name: foreman-installer-katello
+        state: present
+
+    - name: set hostname
+      ansible.builtin.hostname:
+        name: "{{hostname}}"
+
+    - name: Ensure SELinux is set to enforcing mode
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        regexp: '^127.0.0.1'
+        line: "127.0.0.1 {{hostname}}"
+
+
+    - name: Run the foreman installer
+      ansible.builtin.command: foreman-installer --scenario katello
