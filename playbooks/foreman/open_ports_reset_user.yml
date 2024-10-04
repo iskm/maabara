@@ -1,0 +1,29 @@
+---
+- name: Open all ports and needed by foreman
+  hosts: foremanAlma
+  become: yes
+  vars_files:
+    - /home/mango/projects/homelab/vars/secrets.yml
+  vars:
+    username: root
+  tasks:
+    - name: permit traffic in default zone for https service
+      ansible.posix.firewalld:
+        service: "{{item}}"
+        permanent: true
+        state: enabled
+        immediate: yes
+      loop:
+        - https
+        - dns
+        - dhcp
+        - tftp
+        - http
+        - "vnc-server"
+        - "postgresql"
+        - "puppetmaster"
+
+
+    - name: set admin user and password
+      ansible.builtin.command:
+        cmd: "foreman-rake permissions:reset username={{username}} password={{become_password}}"
