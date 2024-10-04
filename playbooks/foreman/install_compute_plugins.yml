@@ -1,0 +1,22 @@
+---
+- name: install a list of compute plugins
+  hosts: foremanAlma
+  become: yes
+  tasks:
+    - name: install compute resource plugins
+      ansible.builtin.dnf:
+        name: "{{item}}"
+        state: present
+      loop:
+        - foreman-libvirt
+        - rubygem-foreman_fog_proxmox
+        - foreman-ec2
+
+    - name: finish any pending migrations
+      ansible.builtin.command:
+        cmd: foreman-rake db-migrate
+
+    - name: restart foreman service
+      ansible.builtin.service:
+        name: foreman
+        state: restarted
