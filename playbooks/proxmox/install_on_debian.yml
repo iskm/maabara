@@ -1,0 +1,14 @@
+---
+- name: This installs proxmox on a debian bookworm(12.5)
+  hosts: localhost
+  become: yes
+  vars:
+    ip_address: 192.168.2.116
+    domain_name: baxter.homelab.local
+    hostname: baxter
+  tasks:
+    - name: Ensure new proxmox host has a valid entry in /etc/hosts
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        regexp: "^{{ip_address}}"
+        line: "{{ip_address}} {{domain_name}} {{hostname}}"
