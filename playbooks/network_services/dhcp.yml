@@ -1,0 +1,41 @@
+---
+- name: sets up dhcp for a local homelab network between 0-255 hosts
+  hosts: dhcp
+  become: true
+  vars:
+    device: ens18
+  tasks:
+    - name: install dhcp software on redhat platform
+      ansible.builtin.dnf:
+        name: dhcp-server
+        state: present
+
+    - name: allow dhcp service on redhat platform
+      ansible.posix.firewalld:
+        service: dhcp
+        permanent: true
+        state: enabled
+        immediate: true
+
+    - name: set up dhcpd.conf
+      ansible.builtin.template:
+        src: /home/mango/projects/homelab/templates/dhcpd.conf.j2
+        dest: /etc/dhcp/dhcpd.conf
+        mode: '0644'
+
+    - name: set the listening device
+      ansible.builtin.lineinfile:
+        path: /usr/lib/systemd/system/dhcpd.service
+        regexp: '^ExecStart='
+        line: "ExecStart=/usr/sbin/dhcpd -f -cf /etc/dhcp/dhcpd.conf -user dhcpd -group dhcpd --no-pid {{device}}"
+
+    - name: daemon reload to restart changes
+      ansible.builtin.systemd:
+        daemon_reload: true
+
+
+    - name: start the dhcp service
+      ansible.builtin.service:
+        name: dhcpd
+        state: started
+        enabled: true
