@@ -1,3 +1,9 @@
+[control]
+localhost
+
+[dns]
+192.168.2.236
+
 [aws]
 aws ansible_user=ubuntu
 

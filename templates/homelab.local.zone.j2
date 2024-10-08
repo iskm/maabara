@@ -1,0 +1,12 @@
+$TTL 8h
+@ IN SOA ns1.homelab.local. hostmaster.homelab.local. (
+                          2024100607 ; serial number
+                          1d         ; refresh period
+                          3h         ; retry period
+                          3d         ; expire time
+                          3h )       ; minimum TTL
+
+;www               IN A    192.168.2.
+@                 IN NS   ns1.homelab.local.
+ns1               IN A    192.168.2.236
+;mail              IN A    192.0.2.20
