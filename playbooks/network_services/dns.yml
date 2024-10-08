@@ -39,13 +39,17 @@
 
     - name: allow access to a firewall
       ansible.posix.firewalld:
-        service: dns
+        service: "{{item}}"
         permanent: true
         state: enabled
         immediate: true
+      loop:
+        - "dns"
+        - "dns-over-tls"
+        - "mdns"
 
     - name: start the bind service
       ansible.builtin.service:
         name: named
-        state: started
+        state: restarted
         enabled: true
