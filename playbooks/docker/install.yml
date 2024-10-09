@@ -1,0 +1,6 @@
+---
+- name: installs docker on machine using jeffs geerling role
+  hosts: docker
+  become: true
+  roles:
+    - geerlingguy.docker
