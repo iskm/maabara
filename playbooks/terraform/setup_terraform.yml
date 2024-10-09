@@ -1,0 +1,47 @@
+---
+- name: install terraform on deb/rpm family
+  hosts: docker
+  become: yes
+  tasks:
+    - name: update cache on debian/rpm family
+      block:
+        # assume its a debian host
+        - name: Assume its apt
+          ansible.builtin.apt:
+            update_cache: true
+        - name: install requirements
+          ansible.builtin.apt:
+            pkg:
+              - gnupg
+              - software-properties-common
+        - name: download the key
+          ansible.builtin.get_url:
+            url: https://apt.releases.hashicorp.com/gpg
+            dest: /tmp/hashi_key
+
+        - name: save the key
+          ansible.builtin.shell: "cat /tmp/hashi_key | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null"
+
+        - name: Verify the gpg key
+          ansible.builtin.command:
+            cmd: gpg --no-default-keyring --keyring /usr/share/keyrings/hashicorp-archive-keyring.gpg --fingerprint
+
+        - name: install terraform
+          ansible.builtin.apt_repository:
+            repo: "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com {{ansible_distribution_release}} main"
+            state: present
+            filename: hashicorp.list
+
+        - name: Assume its apt
+          ansible.builtin.apt:
+            update_cache: true
+
+        - name: Assume its apt
+          ansible.builtin.apt:
+            pkg:
+              - terraform
+
+        - name: verify terraform works
+          ansible.builtin.command:
+            cmd: terraform -help
+
