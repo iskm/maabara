@@ -3,7 +3,7 @@
   hosts: aws
   become: true
   vars_files:
-    - ../vars/secrets.yml
+    - ../../vars/secrets.yml
   vars:
     postgresql_user: gitea
     postgresql_db: giteadb
@@ -13,6 +13,7 @@
     - name: install postgresql
       apt:
         name: "{{item}}"
+        state: present
       loop:
         - postgresql
         - postgresql-contrib
@@ -147,3 +148,13 @@
         name: gitea
         state: started
         enabled: yes
+
+    - name: start the action docker runner
+      community.docker.docker_container:
+        name: gitea_runner
+        state: started
+        image: gitea/act_runner:latest
+        env:
+          GITEA_INSTANCE_URL: "https://gitea.kwerezigua.org"
+          GITEA_RUNNER_REGISTRATION_TOKEN: "{{gitea_action_token}}"
+          GITEA_RUNNER_NAME: "mfanyakazi"
