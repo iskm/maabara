@@ -4,6 +4,7 @@
   become: true
   vars_files:
     - ../../vars/secrets.yml
+    - ../../vars/vars.yml
   vars:
     postgresql_user: gitea
     postgresql_db: giteadb
@@ -159,8 +160,8 @@
         src: /home/ubuntu/hifadhi_kuu/gitea/act_runner-0.2.11-linux-amd64
         remote_src: true
         dest: /usr/local/bin/act_runner
-        owner: ansible
-        mode: '0744'
+        owner: git
+        mode: '0755'
 
     - name: configure the gitea action runner non-interactively
       ansible.builtin.shell:
@@ -173,9 +174,13 @@
       args:
         chdir: /home/ubuntu/hifadhi_kuu/gitea
 
-    - name: start the act_runner daemon
-      ansible.builtin.shell:
-        cmd: |
-          act_runner daemon
-      args:
-        chdir: /home/ubuntu/hifadhi_kuu/gitea
+    - name: install the act_runner systemd service
+      ansible.builtin.template:
+        src: ../../templates/act_runner.service.j2
+        dest: /etc/systemd/system/act_runner.service
+
+    - name: start the gitea action service
+      service:
+        name: act_runner
+        state: restarted
+        enabled: true
