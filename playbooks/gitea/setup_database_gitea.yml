@@ -149,12 +149,33 @@
         state: started
         enabled: yes
 
-    - name: start the action docker runner
-      community.docker.docker_container:
-        name: gitea_runner
-        state: started
-        image: gitea/act_runner:latest
-        env:
-          GITEA_INSTANCE_URL: "https://gitea.kwerezigua.org"
-          GITEA_RUNNER_REGISTRATION_TOKEN: "{{gitea_action_token}}"
-          GITEA_RUNNER_NAME: "mfanyakazi"
+    - name: download the gitea action binary if it doesn't exist
+      ansible.builtin.get_url:
+        url: https://gitea.com/gitea/act_runner/releases/download/v0.2.11/act_runner-0.2.11-linux-amd64
+        dest: /home/ubuntu/hifadhi_kuu/gitea
+
+    - name: copy the gitea runner binary to /usr/local/bin directory
+      copy:
+        src: /home/ubuntu/hifadhi_kuu/gitea/act_runner-0.2.11-linux-amd64
+        remote_src: true
+        dest: /usr/local/bin/act_runner
+        owner: ansible
+        mode: '0744'
+
+    - name: configure the gitea action runner non-interactively
+      ansible.builtin.shell:
+        cmd: |
+          chmod +x /usr/local/bin/act_runner
+          act_runner --version
+          act_runner register --no-interactive --instance \
+          https://gitea.kwerezigua.org --token "{{gitea_action_token}}" \
+            --name mfanyakazi
+      args:
+        chdir: /home/ubuntu/hifadhi_kuu/gitea
+
+    - name: start the act_runner daemon
+      ansible.builtin.shell:
+        cmd: |
+          act_runner daemon
+      args:
+        chdir: /home/ubuntu/hifadhi_kuu/gitea
