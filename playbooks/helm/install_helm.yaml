@@ -1,0 +1,6 @@
+---
+- name: use Jeff GeerlingGuy's role to install helm
+  become: true
+  hosts: helm
+  roles:
+    - role: geerlingguy.helm

@@ -32,6 +32,3 @@
         groups: 
           - kvm
           - libvirt
-
-
-

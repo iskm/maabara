@@ -1,5 +1,5 @@
 ---
-- name: installs and setups nginx on hosts
+- name: installs and setups caddy on hosts
   hosts: aws
   become: true
   vars:

@@ -36,23 +36,23 @@
         name: "*"
         state: latest
 
-- name: Upgrade pihole on dns using docker compose
-  hosts: pihole
-  tasks:
-    - name: pull new images via docker compose
-      command:
-        cmd: docker compose -f pihole_compose.yml pull
-        chdir: /home/pollen/pihole
+#- name: Upgrade pihole on dns using docker compose
+  #hosts: pihole
+  #tasks:
+    #- name: pull new images via docker compose
+      #command:
+        #cmd: docker compose -f pihole_compose.yml pull
+        #chdir: /home/pollen/pihole
 
-    - name: remove the currently running container
-      command:
-        cmd: docker compose -f pihole_compose.yml down
-        chdir: /home/pollen/pihole
+    #- name: remove the currently running container
+      #command:
+        #cmd: docker compose -f pihole_compose.yml down
+        #chdir: /home/pollen/pihole
 
-    - name: bring back pihole container
-      command:
-        cmd: docker compose -f pihole_compose.yml up -d
-        chdir: /home/pollen/pihole
+    #- name: bring back pihole container
+      #command:
+        #cmd: docker compose -f pihole_compose.yml up -d
+        #chdir: /home/pollen/pihole
 
 # work in progress for windows host
 # - name: Upgrade software on windows hosts
