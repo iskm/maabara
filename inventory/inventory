@@ -11,8 +11,7 @@ localhost
 aws ansible_user=ubuntu
 
 [helm]
-192.168.1.233 ansible_user=ansible
-192.168.1.237 ansible_user=ansible
+node1   ansible_user=ansible
 
 [dhcp]
 192.168.2.191 
