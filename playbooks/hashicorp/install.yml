@@ -1,6 +1,6 @@
 ---
 - name: install terraform on deb/rpm family
-  hosts: docker
+  hosts: terraform
   become: yes
   tasks:
     - name: update cache on debian/rpm family
@@ -40,6 +40,7 @@
           ansible.builtin.apt:
             pkg:
               - terraform
+              - packer
 
         - name: verify terraform works
           ansible.builtin.command:

@@ -5,7 +5,7 @@ localhost
 192.168.2.236
 
 [docker]
-192.168.1.236 ansible_user=ansible
+node1 ansible_user=ansible
 
 [aws]
 aws ansible_user=ubuntu
@@ -13,8 +13,11 @@ aws ansible_user=ubuntu
 [helm]
 node1   ansible_user=ansible
 
+[terraform]
+node1
+
 [dhcp]
-192.168.2.191 
+nodex
 
 [doc]
 doc ansible_user=pollen
