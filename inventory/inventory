@@ -5,13 +5,15 @@ localhost
 192.168.2.236
 
 [docker]
-node1 ansible_user=ansible
+docker0 ansible_user=ansible
 
 [aws]
 aws ansible_user=ubuntu
 
 [helm]
 node1   ansible_user=ansible
+node4   ansible_user=ansible
+
 
 [terraform]
 node1

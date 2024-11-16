@@ -1,6 +1,6 @@
 ---
 - name: install terraform on deb/rpm family
-  hosts: terraform
+  hosts: localhost
   become: yes
   tasks:
     - name: update cache on debian/rpm family
