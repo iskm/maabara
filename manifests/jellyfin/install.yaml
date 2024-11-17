@@ -40,4 +40,23 @@ spec:
           server: 192.168.0.106
           path: /exports/nfs_share/media1
 status: {}
-
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: jellyfin
+  name: jellyfin
+  namespace: media
+spec:
+  ports:
+  - port: 8096
+    protocol: TCP
+    targetPort: 8096
+    nodePort: 32001
+  selector:
+    app: jellyfin
+  type: NodePort
+status:
+  loadBalancer: {}
