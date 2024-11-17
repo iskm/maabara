@@ -54,9 +54,8 @@ spec:
   - port: 8096
     protocol: TCP
     targetPort: 8096
-    nodePort: 32001
   selector:
     app: jellyfin
-  type: NodePort
+  type: LoadBalancer
 status:
   loadBalancer: {}
