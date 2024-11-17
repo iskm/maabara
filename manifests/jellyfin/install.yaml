@@ -1,0 +1,35 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: null
+  name: media
+spec: {}
+status: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: jellyfin
+  name: jellyfin
+  namespace: media
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jellyfin
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: jellyfin
+    spec:
+      containers:
+      - image: jellyfin/jellyfin:latest
+        name: jellyfin
+        resources: {}
+status: {}
+
