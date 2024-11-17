@@ -35,6 +35,8 @@ foremanAlma ansible_user=ansible
 [windows]
 bane ansible_user=ansible ansible_connection=winrm ansible_winrm_transport=basic ansible_port=5985 ansible_winrm_server_cert_validation=ignore
 
+baxter
+
 [servers:children]
 doc
 aws

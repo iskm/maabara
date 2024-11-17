@@ -1,0 +1,27 @@
+---
+- name: installs nfs and makes common folders available to the network
+  hosts: baxter
+  become: true
+  vars_files:
+    - ../../vars/secrets.yml
+  tasks:
+  - name: install nfs core packages
+    ansible.builtin.apt:
+      name: nfs-kernel-server
+      state: present 
+
+  - name: write config to /etc/exports
+    ansible.builtin.template:
+      src: ../../templates/exports.conf.j2
+      dest: /etc/exports
+      mode: '0644'
+
+  - name: export the configuration(being safe)
+    ansible.builtin.shell: |
+      exportfs -ra
+
+  - name: start the nfs service 
+    ansible.builtin.service:
+      name: nfs-kernel-server
+      state: started
+      enabled: true
