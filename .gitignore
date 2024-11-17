@@ -1,3 +1,5 @@
 secrets.yml
 roles/*
 collections/*
+bind.conf.j2
+dhcpd.conf.j2
