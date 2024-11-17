@@ -25,3 +25,13 @@
       name: nfs-kernel-server
       state: started
       enabled: true
+
+
+- name: install nfs-common on all k8s nodes
+  hosts: cluster
+  become: true
+  tasks:
+  - name: install nfs-common(debian based)
+    ansible.builtin.apt:
+      name: nfs-common
+      state: present

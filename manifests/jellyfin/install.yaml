@@ -31,5 +31,13 @@ spec:
       - image: jellyfin/jellyfin:latest
         name: jellyfin
         resources: {}
+        volumeMounts:
+        - mountPath: /media
+          name: media-vol
+      volumes:
+      - name: media-vol
+        nfs:
+          server: 192.168.0.106
+          path: /exports/nfs_share/media1
 status: {}
 
