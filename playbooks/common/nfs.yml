@@ -27,11 +27,14 @@
       enabled: true
 
 
-- name: install nfs-common on all k8s nodes
+- name: install nfs-common on all k8s nodes + prep for longhorn
   hosts: cluster
   become: true
   tasks:
   - name: install nfs-common(debian based)
     ansible.builtin.apt:
-      name: nfs-common
-      state: present
+      pkg:
+        - open-iscsi
+        - nfs-common
+        - cryptsetup
+        - dmsetup
