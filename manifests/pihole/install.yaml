@@ -32,24 +32,16 @@ spec:
         app: pihole
     spec:
       containers:
-        - image: pihole/pihole:latest
+        - image: pihole/pihole
           name: pihole
-          ports:
-          - containerPort: 80
-          - containerPort: 53
           resources: {}
           env:
             - name: TZ
               value: "America/New_York"
             - name: WEBPASSWORD
               value: "initial"
-          #volumeMounts:
-            #- name: etc-dir
-              #mountPath: /etc
-      #volumes:
-        #- name: etc-dir
-          #persistentVolumeClaim:
-            #claimName: pihole-longhorn-volv-pvc
+            - name: DNSMASQ_LISTENING
+              value: "all"
 status: {}
 
 ---
