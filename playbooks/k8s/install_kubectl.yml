@@ -1,11 +1,11 @@
 ---
 - name: adds the kubernetes repo and installs kubectl
-  hosts: localhost
-  become: true
+  hosts: all
   tasks:
   - name: update apt cache
     ansible.builtin.apt:
       update_cache: true
+    become: true
 
   - name: install core pre-reqs
     ansible.builtin.apt:
@@ -14,28 +14,33 @@
         - ca-certificates
         - curl
         - gnupg
+    become: true
 
   - name: check to see if gpg key exists
     ansible.builtin.stat:
       path: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
     register: st
+    become: true
 
   - name: download the key and install it
     ansible.builtin.shell: |
       curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
       sudo chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg # allow unprivileged APT programs to read this keyring
     when: st.stat.exists != true
+    become: true
 
   - name: add the kubernetes apt repository
     ansible.builtin.apt_repository:
       repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /"
       state: present
       filename: kubernetes.list
+    become: true
 
   - name: update apt cache and install kubectl
     ansible.builtin.apt:
       name: kubectl
       update_cache: true
+    become: true
 
 
   - name: does argocd exists
@@ -49,4 +54,4 @@
       sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
       rm argocd-linux-amd64
     when: st.stat.exists != true
-
+    become: true
