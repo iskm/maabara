@@ -118,13 +118,13 @@ serviceWeb:
     nodePort: ""
 
   # -- `spec.type` for the web interface Service
-  type: ClusterIP
+  type: LoadBalancer
 
   # -- `spec.externalTrafficPolicy` for the web interface Service
   externalTrafficPolicy: Local
 
   # -- A fixed `spec.loadBalancerIP` for the web interface Service
-  loadBalancerIP: ""
+  loadBalancerIP: "192.168.0.239"
   # -- A fixed `spec.loadBalancerIP` for the IPv6 web interface Service
   loadBalancerIPv6: ""
 
@@ -404,6 +404,7 @@ regex: {}
 ftl: {}
   # Add values for pihole-FTL.conf
   # MAXDBDAYS: 14
+  #StartLimitBurst: 25
 
 # -- port the container should use to expose HTTP traffic
 webHttp: "80"
