@@ -1,0 +1,7 @@
+---
+# defaults file for github_runner, will be overriden
+runner_version: 2.321.0
+repository: https://github.com/iskm/maabara
+token: 1234
+labels: "red, green, blue"
+user: ansible

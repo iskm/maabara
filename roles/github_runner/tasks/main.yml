@@ -1,0 +1,4 @@
+---
+# tasks file for github_runner
+- include_tasks: install_runner.yml
+- include_tasks: configure_runner.yml

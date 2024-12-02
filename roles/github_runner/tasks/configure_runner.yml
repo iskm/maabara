@@ -1,0 +1,28 @@
+---
+- name: configure action runner on machine
+  ansible.builtin.shell: >
+    ./config.sh --unattended --url {{repository}} --token {{token}} --replace
+    --name {{ansible_hostname}} --labels {{labels}}
+  args:
+    chdir: actions_runner
+
+- name: setup and start github action runner as a service
+  ansible.builtin.shell: >
+    ./svc.sh install {{user}}
+  args:
+    chdir: actions_runner
+  become: true
+
+- name: start the  service
+  ansible.builtin.shell: >
+    ./svc.sh start
+  args:
+    chdir: actions_runner
+  become: true
+
+- name: display status of service
+  ansible.builtin.shell: >
+    ./svc.sh status
+  args:
+    chdir: actions_runner
+  become: true

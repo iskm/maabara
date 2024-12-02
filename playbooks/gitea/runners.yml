@@ -1,0 +1,12 @@
+---
+- name: installs and configures hosts to be a runner for a target repository
+  hosts: docker
+  vars_files:
+    - ../../vars/secrets.yml  # github "token" obtained here
+  vars:
+    runner_version: "2.321.0"
+    repository: https://github.com/iskm/maabara
+    labels: "test"
+    user: ansible
+  roles:
+    - github_runner
