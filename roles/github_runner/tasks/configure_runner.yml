@@ -1,4 +1,26 @@
 ---
+- name: add a policy to allow service to run with selinux
+  ansible.builtin.shell: |
+    ausearch -c '.NET DebugPipe' --raw | audit2allow -M my-NETDebugPipe
+    semodule -X 300 -i my-NETDebugPipe.pp
+    ausearch -c 'runsvc.sh' --raw | audit2allow -M my-runsvcsh
+    semodule -X 300 -i my-runsvcsh.pp
+    ausearch -c 'Runner.Listener' --raw | audit2allow -M my-RunnerListener
+    semodule -i my-RunnerListener.pp
+    ausearch -c 'node' --raw | audit2allow -M my-node
+    semodule -X 300 -i my-node.pp
+    setsebool -P domain_can_mmap_files 1
+    ausearch -c '(unsvc.sh)' --raw | audit2allow -M my-unsvcsh
+    semodule -X 300 -i my-unsvcsh.pp
+    setsebool -P nis_enabled 1
+    ausearch -c '.NET TP Worker' --raw | audit2allow -M my-NETTPWorker
+    semodule -X 300 -i my-NETTPWorker.pp
+    restorecon -Rv /
+  args:
+    chdir: actions_runner
+  become: true
+  when: ansible_os_family == "RedHat"
+
 - name: configure action runner on machine
   ansible.builtin.shell: >
     ./config.sh --unattended --url {{repository}} --token {{token}} --replace

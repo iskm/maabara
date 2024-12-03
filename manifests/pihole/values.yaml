@@ -354,6 +354,7 @@ dnsmasq:
   - 192.168.0.113     node4
   - 192.168.0.114     node5
   - 192.168.0.115     node6
+  - 192.168.0.103     rhel0
 
   # -- Static DHCP config
   staticDhcpEntries: []
