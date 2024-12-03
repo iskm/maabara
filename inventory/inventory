@@ -2,13 +2,13 @@
 localhost
 
 [dns]
-192.168.2.236
 
 [docker]
 docker0 ansible_user=ansible
 rhel0   ansible_user=ansible
+rhel1   ansible_user=ansible
 
-[aws]
+[aws] 
 aws ansible_user=ubuntu
 
 [helm]

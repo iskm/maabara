@@ -6,7 +6,7 @@
   vars:
     runner_version: "2.321.0"
     repository: https://github.com/iskm/maabara
-    labels: "test"
+    labels: "test,ultramarines"
     user: ansible
   roles:
     - github_runner
