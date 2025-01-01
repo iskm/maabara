@@ -34,11 +34,23 @@ spec:
         volumeMounts:
         - mountPath: /media
           name: media-vol
+        - mountPath: /media1
+          name: media-vol1
+        - mountPath: /media2
+          name: media-vol2
       volumes:
       - name: media-vol
         nfs:
           server: 192.168.0.106
           path: /exports/nfs_share/media1
+      - name: media-vol1
+        nfs:
+          server: 192.168.0.106
+          path: /exports/nfs_share/media2
+      - name: media-vol2
+        nfs:
+          server: 192.168.0.106
+          path: /exports/nfs_share/media3
 status: {}
 ---
 apiVersion: v1
@@ -47,11 +59,13 @@ metadata:
   creationTimestamp: null
   labels:
     app: jellyfin
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: jellyfin.homelab.local
   name: jellyfin
   namespace: media
 spec:
   ports:
-  - port: 8096
+  - port: 80 # tired of typing the port address every time
     protocol: TCP
     targetPort: 8096
   selector:
