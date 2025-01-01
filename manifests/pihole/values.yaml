@@ -129,7 +129,8 @@ serviceWeb:
   loadBalancerIPv6: ""
 
   # -- Annotations for the DHCP service
-  annotations: {}
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: pihole.homelab.local
     # metallb.universe.tf/address-pool: network-services
     # metallb.universe.tf/allow-shared-ip: pihole-svc
 
