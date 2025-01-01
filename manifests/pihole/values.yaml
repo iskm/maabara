@@ -255,6 +255,7 @@ topologySpreadConstraints: []
 affinity: {}
 
 # -- Administrator password when not using an existing secret (see below)
+# -- Change the admin password prior to installing
 adminPassword: "admin"
 
 # -- Use an existing secret for the admin password.
@@ -264,7 +265,7 @@ admin:
   # -- Specify an existing secret to use as admin password
   existingSecret: ""
   # -- Specify the key inside the secret to use
-  passwordKey: "password"
+  passwordKey: ""
   # -- Specify [annotations](docs/Values.md#admin.annotations) to be added to the secret
   annotations:
     # reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
