@@ -1,11 +1,12 @@
 ---
 - name: adds the kubernetes repo and installs kubectl
-  hosts: all
+  hosts: localhost
+  become: true
   tasks:
+########## KUBECTL INSTALL ##########
   - name: update apt cache
     ansible.builtin.apt:
       update_cache: true
-    become: true
 
   - name: install core pre-reqs
     ansible.builtin.apt:
@@ -14,35 +15,30 @@
         - ca-certificates
         - curl
         - gnupg
-    become: true
 
   - name: check to see if gpg key exists
     ansible.builtin.stat:
       path: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
     register: st
-    become: true
 
   - name: download the key and install it
     ansible.builtin.shell: |
-      curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+      curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
       sudo chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg # allow unprivileged APT programs to read this keyring
     when: st.stat.exists != true
-    become: true
 
   - name: add the kubernetes apt repository
     ansible.builtin.apt_repository:
-      repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /"
+      repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /"
       state: present
       filename: kubernetes.list
-    become: true
 
   - name: update apt cache and install kubectl
     ansible.builtin.apt:
       name: kubectl
       update_cache: true
-    become: true
 
-
+########## ARGOCD INSTALL ##########
   - name: does argocd exists
     ansible.builtin.stat:
       path: /usr/local/bin/argocd
@@ -54,4 +50,14 @@
       sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
       rm argocd-linux-amd64
     when: st.stat.exists != true
-    become: true
+
+########## HELM INSTALL ##########
+  - name: install repository and key (not idempotent)
+    ansible.builtin.shell: |
+      curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
+      echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+      apt update
+
+  - name: install helm kubernetes package manager
+    ansible.builtin.apt:
+      name: helm
