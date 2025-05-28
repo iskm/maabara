@@ -1,5 +1,45 @@
 # Changelog
 
+## [2.31.0](https://github.com/MoJo2600/pihole-kubernetes/compare/pihole-2.30.0...pihole-2.31.0) (2025-05-16)
+
+
+### Features
+
+* Allow specifying loadBalancerClass for LoadBalancer services ([#370](https://github.com/MoJo2600/pihole-kubernetes/issues/370)) ([d0c9f95](https://github.com/MoJo2600/pihole-kubernetes/commit/d0c9f9534d83020d5b4541f6c402912279db38d5))
+
+## [2.30.0](https://github.com/MoJo2600/pihole-kubernetes/compare/pihole-2.29.1...pihole-2.30.0) (2025-04-30)
+
+
+### Features
+
+* bump pihole version to 2025.04.0 ([#364](https://github.com/MoJo2600/pihole-kubernetes/issues/364)) ([b41ff7f](https://github.com/MoJo2600/pihole-kubernetes/commit/b41ff7f264ea4472a2556ed34c8d8a79eb616af0))
+
+## [2.29.1](https://github.com/MoJo2600/pihole-kubernetes/compare/pihole-2.29.0...pihole-2.29.1) (2025-03-08)
+
+
+### Bug Fixes
+
+* revert liveness and readiness probe back to http ([#357](https://github.com/MoJo2600/pihole-kubernetes/issues/357)) ([bbb557b](https://github.com/MoJo2600/pihole-kubernetes/commit/bbb557b1730c31cec5401d99c9962613e376358a)), closes [#356](https://github.com/MoJo2600/pihole-kubernetes/issues/356)
+* updated pihole exporter to v1.0.0 ([#351](https://github.com/MoJo2600/pihole-kubernetes/issues/351)) ([04d4e90](https://github.com/MoJo2600/pihole-kubernetes/commit/04d4e9047e3cbe6d1d0dade813367beb6291777c))
+
+## [2.29.0](https://github.com/MoJo2600/pihole-kubernetes/compare/pihole-2.28.0...pihole-2.29.0) (2025-03-07)
+
+
+### Features
+
+* allow for env map values ([#339](https://github.com/MoJo2600/pihole-kubernetes/issues/339)) ([f6fcb06](https://github.com/MoJo2600/pihole-kubernetes/commit/f6fcb06d4c5d3a5fd41e08d8dbcc7e3fbba68a85))
+* bump pihole version to 2025.03.0 ([#352](https://github.com/MoJo2600/pihole-kubernetes/issues/352)) ([83dd678](https://github.com/MoJo2600/pihole-kubernetes/commit/83dd67801fe07f872a12301a96f087b8e9d0f2f1))
+
+## [2.28.0](https://github.com/MoJo2600/pihole-kubernetes/compare/pihole-2.27.0...pihole-2.28.0) (2025-03-02)
+
+
+### Features
+
+* add custom deployment annotation option ([#332](https://github.com/MoJo2600/pihole-kubernetes/issues/332)) ([bc8f720](https://github.com/MoJo2600/pihole-kubernetes/commit/bc8f720a9343e8b61fea68b67a2aa4f9ca56c0f4))
+* allow to override the command of the cloudflared container. ([#331](https://github.com/MoJo2600/pihole-kubernetes/issues/331)) ([02cff49](https://github.com/MoJo2600/pihole-kubernetes/commit/02cff4992313488524f0883946bb6e425be8be77))
+* PiHole v6 Support ([#343](https://github.com/MoJo2600/pihole-kubernetes/issues/343)) ([8112b80](https://github.com/MoJo2600/pihole-kubernetes/commit/8112b800b98eb6ff23aa19d074b56acd72e1066b))
+* support doh readiness and podmonitor ([#335](https://github.com/MoJo2600/pihole-kubernetes/issues/335)) ([2c5aaf5](https://github.com/MoJo2600/pihole-kubernetes/commit/2c5aaf592b10d69ce674e87833edb82ad4954110))
+
 ## [2.27.0](https://github.com/MoJo2600/pihole-kubernetes/compare/pihole-2.26.2...pihole-2.27.0) (2024-11-28)
 
 

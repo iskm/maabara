@@ -46,3 +46,12 @@
           ansible.builtin.command:
             cmd: terraform -help
 
+#        - name: Install aws-cli (A terraform prerequisite)
+          #ansible.builtin.shell: |
+            #curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            #unzip awscliv2.zip
+            #./aws/install
+          #args:
+            #chdir: /tmp
+
+

@@ -1,6 +1,6 @@
 ---
 - name: adds the kubernetes repo and installs kubectl
-  hosts: localhost
+  hosts: docker
   become: true
   tasks:
 ########## KUBECTL INSTALL ##########
