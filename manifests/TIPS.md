@@ -1,5 +1,5 @@
 On a fresh cluster, the order of installation is usually `metallb` -> `pihole`
--> external-dns -> your favorite ingress controller -> cert-manager -> rest of services
+-> your favorite ingress controller->  external-dns -> cert-manager -> rest of services
 
 
 Installing `pihole` via helm, it will look for its password in a secret named
