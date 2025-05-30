@@ -1,0 +1,19 @@
+---
+- name: setup and manage nodes
+  hosts: k8s
+  become: true
+  vars_files:
+    - ../../vars/packages.yml
+  tasks:
+    - name: install requisities
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ longhorn_requirements_deb }}"
+
+    - name: start the iscsid service
+      service:
+        name: iscsid
+        state: started
+        enabled: true
+

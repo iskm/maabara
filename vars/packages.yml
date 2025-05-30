@@ -20,3 +20,11 @@ minimal_debian_packages:
   - clang
   - screenfetch
   - build-essential
+
+longhorn_requirements_deb:
+  - open-iscsi
+  - nfs-common
+
+longhorn_requirements_rpm:
+  - open-iscsi
+  - iscsi-initiator-utils
