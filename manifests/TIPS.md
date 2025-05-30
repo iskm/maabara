@@ -15,3 +15,11 @@ actual encryption at rest is enabled for your passwords.
 Make sure to update your main LAN dns servers to point to pihole. 2 instances
 for redundancy are highly encouraged
 
+Installing externaldns via manifests, it will look for its password in a secret named
+`pihole-externaldns-password` in the same namespace. You can create it like so
+```
+kubectl create secret generic pihole-dashboard-password
+--from-literal=EXTERNAL_DNS_PIHOLE_PASSWORD=XXXXXXXXX
+
+```
+
