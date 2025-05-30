@@ -35,7 +35,7 @@ dnsHostPort:
 # -- Configuration for the DNS service on port 53
 serviceDns:
   # -- deploys a mixed (TCP + UDP) Service instead of separate ones
-  mixedService: false
+  mixedService: true
 
   # -- `spec.type` for the DNS Service
   type: LoadBalancer
@@ -275,9 +275,9 @@ admin:
   # -- If set to false admin password will be disabled, adminPassword specified above and the pre-existing secret (if specified) will be ignored.
   enabled: true
   # -- Specify an existing secret to use as admin password
-  existingSecret: ""
+  existingSecret: pihole-dashboard-password
   # -- Specify the key inside the secret to use
-  passwordKey: "password"
+  passwordKey: password
   # -- Specify [annotations](docs/Values.md#admin.annotations) to be added to the secret
   annotations:
     # reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
@@ -387,6 +387,7 @@ dnsmasq:
 
   # -- Dnsmasq reads the /etc/hosts file to resolve ips. You can add additional entries if you like
   additionalHostsEntries:
+  - 192.168.0.5       t440
   - 192.168.0.102     baxter
   - 192.168.0.104     docker0
   - 192.168.0.101     node0
@@ -397,7 +398,7 @@ dnsmasq:
   - 192.168.0.108     node5
   - 192.168.0.109     rhel0
   - 192.168.0.110     omada
-  - 192.168.0.100     pve
+  - 192.168.0.100     pve0
 
   # - 192.168.0.3     host4
   # - 192.168.0.4     host5
@@ -594,7 +595,7 @@ monitoring:
       #  memory: 128Mi
 
 podDnsConfig:
-  enabled: true
+  enabled: false
   policy: "None"
   nameservers:
     - 127.0.0.1

@@ -4,3 +4,7 @@ collections:
   - community.general
   - community.postgresql
   - community.docker
+
+roles:
+  - geerlingguy.docker
+  - geerlingguy.pip
