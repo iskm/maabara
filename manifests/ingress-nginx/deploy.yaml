@@ -343,6 +343,8 @@ metadata:
     app.kubernetes.io/version: 1.12.2
   name: ingress-nginx-controller
   namespace: ingress-nginx
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: www.homelab.local
 spec:
   externalTrafficPolicy: Local
   ipFamilies:
