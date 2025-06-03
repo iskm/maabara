@@ -1,0 +1,40 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgresql
+  namespace: postgresql
+spec:
+  instances: 3
+  primaryUpdateStrategy: unsupervised
+  storage:
+    storageClass: longhorn-single-replica
+    size: 8Gi
+
+  managed:
+    services:
+      ## disable the default services
+      #disabledDefaultServices: ["ro", "r"]
+      additional:
+        - selectorType: rw
+          serviceTemplate:
+            metadata:
+              name: "pg-rw"
+              annotations:
+                external-dns.alpha.kubernetes.io/hostname: pg.homelab.local
+            spec:
+              type: LoadBalancer
+              loadBalancerIP: 192.168.0.248
+
+  # overkill for my lab
+  #backup:
+    #barmanObjectStore:
+      #destinationPath: s3://BUCKET_NAME/path/to/folder
+      #s3Credentials:
+        #accessKeyId:
+          #name: aws-creds
+          #key: ACCESS_KEY_ID
+        #secretAccessKey:
+          #name: aws-creds
+          #key: ACCESS_SECRET_KEY
+    #wal:
+      #compression: gzip

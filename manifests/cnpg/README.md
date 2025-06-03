@@ -1,0 +1,3 @@
+longhorn is the default storage provider in this cluster. By default, its
+replicates storage 3 times which is redundant as the postgresql does
+application level replication
