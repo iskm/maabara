@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: cloudflare
+  name: cloudflare
+  namespace: gitea
+spec:
+  securityContext:
+    sysctls:
+      - name: net.ipv4.ping_group_range
+        value: "65532 65532"
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cloudflare
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: cloudflare
+    spec:
+      containers:
+      - image: cloudflare/cloudflared:latest
+        name: cloudflared
+        command:
+          - cloudflared
+          - tunnel
+          - --no-autoupdate
+          - --metrics
+          - 0.0.0.0:2000
+          - run
+        args:
+          - --token
+          - YOUR_TOKEN_HERE_FROM_CLOUDFLARE_GUI
+        livenessProbe:
+          httpGet:
+            path: /ready
+            port: 2000
+          failureThreshold: 1
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        resources: {}
+status: {}

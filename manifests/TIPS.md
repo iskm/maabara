@@ -24,3 +24,6 @@ kubectl create secret generic pihole-dashboard-password
 
 ```
 
+
+If possible, create a secret resource during setup rather than hardcoding
+passwords otherwise there's a good chance of it being committed unawares
