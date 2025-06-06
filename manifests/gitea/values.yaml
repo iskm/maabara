@@ -112,18 +112,18 @@ service:
   ## @param service.http.labels HTTP service additional labels
   ## @param service.http.loadBalancerClass Loadbalancer class
   http:
-    type: LoadBalancer
+    type: ClusterIP
     port: 3000
     clusterIP: None
-    loadBalancerIP: 192.168.0.243 
+    #loadBalancerIP: 192.168.0.243 
     nodePort:
     externalTrafficPolicy:
     externalIPs:
     ipFamilyPolicy:
     ipFamilies:
     loadBalancerSourceRanges: []
-    annotations:
-      external-dns.alpha.kubernetes.io/hostname: gitea.homelab.local
+    #annotations:
+      #external-dns.alpha.kubernetes.io/hostname: gitea.homelab.local
     labels: {}
     loadBalancerClass:
   ## @param service.ssh.type Kubernetes service type for ssh traffic
@@ -165,18 +165,19 @@ service:
 ## @param ingress.hosts[0].paths[0].path Default Ingress path
 ## @param ingress.tls Ingress tls settings
 ingress:
-  enabled: false
-  className: ""
+  enabled: true
+  className: nginx
   pathType: Prefix
-  annotations: {}
+  annotations: 
+    cert-manager.io/cluster-issuer: "letsencrypt-staging"
   hosts:
-    - host: gitea.homelab.local
+    - host: gitea.kwerezigua.org
       paths:
         - path: /
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - git.example.com
+  tls: 
+    - secretName: gitea-certificate-tls
+      hosts:
+        - gitea.kwerezigua.org
 
 ## @section deployment
 #
@@ -425,7 +426,7 @@ gitea:
       HOST: postgresql-rw.postgresql.svc.cluster.local
       NAME: app
       USER: app
-      PASSWD: 8fmD5yuamaUdxs7dsArcqtfJdOgeowuZo6ka7X4Bx2WE1mxO83YYOhiJwTdMiKij
+      PASSWD: ""
       #SSL_MODE: require
 
     server:
