@@ -1,0 +1,63 @@
+# see https://stackoverflow.com/questions/57764237/kubernetes-ingress-to-external-service
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: jellyfin
+spec: {}
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: external-ip
+  namespace: jellyfin
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: jellyfin.homelab.local
+spec:
+  type: LoadBalancer
+  loadBalancerIP: 192.168.0.251
+  ports:
+  - name: app
+    port: 80
+    protocol: TCP
+    targetPort: 8096
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: external-ip
+  namespace: jellyfin
+subsets:
+- addresses:
+  - ip: 192.168.0.104
+  ports:
+  - name: app
+    port: 8096
+    protocol: TCP
+---
+#apiVersion: networking.k8s.io/v1
+#kind: Ingress
+#metadata:
+  #name: external-service
+  #namespace: jellyfin
+  #annotations:
+    #cert-manager.io/cluster-issuer: "letsencrypt-staging"
+#spec:
+  #ingressClassName: nginx
+  #rules:
+  #- host: jellyfin.kwerezigua.org
+    #http:
+      #paths:
+      #- backend:
+          #service:
+            #name: external-ip
+            #port:
+              #number: 80
+        #path: /
+        #pathType: Prefix
+  #tls:
+  #- hosts:
+    #- jellyfin.kwerezigua.org
+    #secretName: jellyfin-ca-secret
+
