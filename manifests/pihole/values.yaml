@@ -50,7 +50,7 @@ serviceDns:
   externalTrafficPolicy: Local
 
   # -- A fixed `spec.loadBalancerIP` for the DNS Service
-  loadBalancerIP: "192.168.0.234"
+  loadBalancerIP: ""
   # -- A fixed `spec.loadBalancerIP` for the IPv6 DNS Service
   loadBalancerIPv6: ""
   # -- `spec.loadBalancerClass` for the DNS Service. Only used if type is LoadBalancer.
@@ -128,7 +128,7 @@ serviceWeb:
   externalTrafficPolicy: Local
 
   # -- A fixed `spec.loadBalancerIP` for the web interface Service
-  loadBalancerIP: "192.168.0.239"
+  loadBalancerIP: ""
   # -- A fixed `spec.loadBalancerIP` for the IPv6 web interface Service
   loadBalancerIPv6: ""
   # -- `spec.loadBalancerClass` for the web interface Service. Only used if type is LoadBalancer.

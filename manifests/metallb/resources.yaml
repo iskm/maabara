@@ -6,7 +6,8 @@ metadata:
   namespace: metallb-system
 spec:
   addresses:
-  - 192.168.0.230-192.168.0.253
+  - 192.168.0.201-192.168.0.229 #k3s-seed
+  #- 192.168.0.230-192.168.0.253 main
 ---
 apiVersion: metallb.io/v1beta1
 kind: L2Advertisement

@@ -1,20 +1,19 @@
 ---
-- name: Updates all managed servers
-  hosts: servers
+- name: Updates all managed servers including localhost
+  hosts: all
   become: true
-  vars:
-    group_vars: groups_vars/servers.yml
   tasks:
-    #- name: update package index on all machines
-      #ansible.builtin.apt:
-        #update_cache: yes
-      #when: ansible_os_family == "Debian"
+    - name: Upgrade all packages to latest version
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+      when: ansible_os_family == "RedHat"
+
 
     - name: Upgrade all packages to latest version
       ansible.builtin.apt:
         name: "*"
         state: latest
-      notify: reboot
       when: ansible_os_family == "Debian"
 
 
@@ -22,37 +21,6 @@
     - name: reboot
       ansible.builtin.reboot:
         test_command: whoami
-
-- name: this updates the control node
-  hosts: localhost
-  become: true
-  tasks:
-    - name: update package index on local machine
-      ansible.builtin.apt:
-        update_cache: true
-
-    - name: update all packages to latest version
-      ansible.builtin.apt:
-        name: "*"
-        state: latest
-
-#- name: Upgrade pihole on dns using docker compose
-  #hosts: pihole
-  #tasks:
-    #- name: pull new images via docker compose
-      #command:
-        #cmd: docker compose -f pihole_compose.yml pull
-        #chdir: /home/pollen/pihole
-
-    #- name: remove the currently running container
-      #command:
-        #cmd: docker compose -f pihole_compose.yml down
-        #chdir: /home/pollen/pihole
-
-    #- name: bring back pihole container
-      #command:
-        #cmd: docker compose -f pihole_compose.yml up -d
-        #chdir: /home/pollen/pihole
 
 # work in progress for windows host
 # - name: Upgrade software on windows hosts
