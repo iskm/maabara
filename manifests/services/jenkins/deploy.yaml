@@ -1,0 +1,84 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: jenkins
+spec: {}
+status: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: jenkins
+  name: jenkins
+  namespace: jenkins
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jenkins
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: jenkins
+    spec:
+      containers:
+      - image: harbor.kwerezigua.org/iskm/jenkins:lts
+        name: jenkins
+        resources: {}
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: jenkins
+  name: jenkins
+  namespace: jenkins
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: jenkins.homelab.local
+spec:
+  type: LoadBalancer
+  loadBalancerIP: 192.168.0.250
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: jenkins
+status:
+  loadBalancer: {}
+#---
+#apiVersion: networking.k8s.io/v1
+#kind: Ingress
+#metadata:
+  #creationTimestamp: null
+  #name: jenkins
+  #namespace: jenkins
+  #annotations:
+    #cert-manager.io/cluster-issuer: "letsencrypt-prod"
+#spec:
+  #ingressClassName: nginx
+  #rules:
+  #- host: www.kwerezigua.org
+    #http:
+      #paths:
+      #- backend:
+          #service:
+            #name: jenkins
+            #port:
+              #number: 80
+        #path: /
+        #pathType: Prefix
+  #tls:
+  #- hosts:
+    #- www.kwerezigua.org
+    #secretName: kwerezigua-ca-secret
+#status:
+  #loadBalancer: {}
+
