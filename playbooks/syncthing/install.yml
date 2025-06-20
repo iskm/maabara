@@ -1,0 +1,31 @@
+- name: Installs syncthing on an Debian/RPM host
+  hosts: t440,baxter
+  become: true
+  tasks:
+  ## Get the package downloaded
+  - name: installs syncthing on Debian
+    ansible.builtin.apt:
+      name: syncthing
+      state: present
+    when: ansible_os_family == "Debian"
+
+  - name: setup the extra repositories on linux(epel9)
+    ansible.builtin.shell: |
+      subscription-manager repos --enable codeready-builder-for-rhel-9-$(arch)-rpms
+      dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+    when:
+    - ansible_os_family == "RedHat"
+    - ansible_distribution_major_version == "9"
+
+  - name: install syncthing on RedHat
+    ansible.builtin.dnf:
+      name: syncthing
+      state: present
+    when: ansible_os_family == "RedHat"
+
+  ## start the systemd user service and setup credentials
+  - name: print follow-on instructions
+    ansible.builtin.debug:
+      msg: Start the @user service, and setup syncthing with device IDs
+
+
