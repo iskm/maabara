@@ -5,3 +5,4 @@ bind.conf.j2
 dhcpd.conf.j2
 !roles/github_runner
 awx-operator
+ansible

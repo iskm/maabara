@@ -1,6 +1,13 @@
 ---
 - name: installs docker on machine using jeffs geerling role
-  hosts: localhost
+  hosts: linux
   become: true
+  vars:
+    docker_users:
+      - ansible
+    pip_install_packages:
+      - name: docker
   roles:
     - geerlingguy.docker
+    - geerlingguy.pip
+

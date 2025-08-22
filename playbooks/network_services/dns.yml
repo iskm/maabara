@@ -1,6 +1,6 @@
 ---
 - name: sets up a fresh redhat 9 vm to offer dns services
-  hosts: dns
+  hosts: all
   become: true
   tasks:
     - name: installs bind
@@ -30,6 +30,12 @@
         dest: /var/named/homelab.local.zone
         mode: '0640'
 
+    - name: install bind conf file in /etc/named.conf
+      ansible.builtin.template:
+        src: ../../templates/192.168.0.rev.j2
+        dest: /var/named/192.168.0.rev
+        mode: '0640'
+
     - name: change file ownership,group and permissions of homelab.local.zone
       ansible.builtin.file:
         path: /var/named/homelab.local.zone
@@ -37,16 +43,16 @@
         group: named
         mode: '0640'
 
-    - name: allow access to a firewall
-      ansible.posix.firewalld:
-        service: "{{item}}"
-        permanent: true
-        state: enabled
-        immediate: true
-      loop:
-        - "dns"
-        - "dns-over-tls"
-        - "mdns"
+    #- name: allow access to a firewall
+      #ansible.posix.firewalld:
+        #service: "{{item}}"
+        #permanent: true
+        #state: enabled
+        #immediate: true
+      #loop:
+        #- "dns"
+        #- "dns-over-tls"
+    #    - "mdns"
 
     - name: start the bind service
       ansible.builtin.service:
