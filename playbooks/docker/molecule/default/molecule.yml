@@ -3,4 +3,10 @@ driver:
   name: docker
 platforms:
   - name: instance
-    image: debian:bookworm
+    image: quay.io/centos/centos:stream8
+    command: /sbin/init
+    tmpfs:
+      - /run
+      - /tmp
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
