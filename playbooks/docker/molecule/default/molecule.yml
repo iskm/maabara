@@ -3,10 +3,4 @@ driver:
   name: docker
 platforms:
   - name: instance
-    image: quay.io/centos/centos:stream8
-    command: /sbin/init
-    tmpfs:
-      - /run
-      - /tmp
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    image: iskmm/debian-systemd:stable
