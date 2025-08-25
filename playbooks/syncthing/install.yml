@@ -1,5 +1,5 @@
 - name: Installs syncthing on an Debian/RPM host
-  hosts: t440,baxter
+  hosts: all
   become: true
   tasks:
   ## Get the package downloaded
