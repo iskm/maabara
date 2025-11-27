@@ -6,3 +6,4 @@ dhcpd.conf.j2
 !roles/github_runner
 awx-operator
 ansible
+docs
