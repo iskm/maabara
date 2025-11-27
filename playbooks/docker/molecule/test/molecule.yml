@@ -7,3 +7,13 @@ platforms:
     # you might want to add your own variables here based on what provisioning
     # you are doing like:
     # image: quay.io/centos/centos:stream8
+
+scenario:
+  test_sequence:
+    - dependency
+    - create
+    - prepare
+    - converge
+    - verify
+    - cleanup
+    - destroy

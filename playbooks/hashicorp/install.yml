@@ -13,7 +13,7 @@
           ansible.builtin.apt:
             pkg:
               - gnupg
-              - software-properties-common
+              #- software-properties-common
         - name: download the key
           ansible.builtin.get_url:
             url: https://apt.releases.hashicorp.com/gpg
