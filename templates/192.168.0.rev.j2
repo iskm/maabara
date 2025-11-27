@@ -1,0 +1,26 @@
+$TTL 8h
+@ IN SOA ns1.homelab.local. hostmaster.homelab.local. (
+                          2023070601 ; serial number
+                          1d         ; refresh period
+                          3h         ; retry period
+                          3d         ; expire time
+                          3h )       ; minimum TTL
+
+                  IN NS   ns1.homelab.local.
+                  IN MX   10 mail.homelab.local.
+
+5                 IN PTR  t440.homelab.local
+102               IN PTR  baxter.homelab.local
+104               IN PTR  docker0.homelab.local
+101               IN PTR  node0.homelab.local
+103               IN PTR  node1.homelab.local
+105               IN PTR  node2.homelab.local
+106               IN PTR  node3.homelab.local
+107               IN PTR  node4.homelab.local
+108               IN PTR  node5.homelab.local
+109               IN PTR  rhel0.homelab.local
+110               IN PTR  omada.homelab.local
+100               IN PTR  pve0.homelab.local
+
+
+
