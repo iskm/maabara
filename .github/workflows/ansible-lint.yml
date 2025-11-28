@@ -14,5 +14,5 @@ jobs:
         with:
           args: "--profile min"
           setup_python: "true"
-          working_directory: "playbooks"
+          working_directory: ""
           requirements_file: "requirements.yml"
