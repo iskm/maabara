@@ -12,7 +12,7 @@ jobs:
         uses: ansible/ansible-lint@v25.11.1
         # optional (see below):
         with:
-          args: ""
+          args: "--profile min"
           setup_python: "true"
           working_directory: "playbooks"
           requirements_file: ""
