@@ -1,6 +1,0 @@
----
-driver:
-  name: docker
-platforms:
-  - name: instance
-    image: iskmm/debian-systemd:stable
