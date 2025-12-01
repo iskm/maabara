@@ -1,9 +1,0 @@
----
-driver:
-  name: default
-platforms:
-  - name: instance
-    image: iskmm/debian-systemd:stable
-    # you might want to add your own variables here based on what provisioning
-    # you are doing like:
-    # image: quay.io/centos/centos:stream8
