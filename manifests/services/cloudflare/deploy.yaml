@@ -23,7 +23,7 @@ spec:
         app: cloudflare
     spec:
       containers:
-      - image: cloudflare/cloudflared:latest
+      - image: cloudflare/cloudflared:1.0.0 # version placeholder 7 DEC 2025
         name: cloudflared
         command:
           - cloudflared

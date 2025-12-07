@@ -35,7 +35,7 @@ spec:
         app: tovuti
     spec:
       containers:
-      - image: gitea.kwerezigua.org/iskm/tovuti:latest
+      - image: gitea.kwerezigua.org/iskm/tovuti:v1.0
         name: tovuti
         resources: {}
 status: {}

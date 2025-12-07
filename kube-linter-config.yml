@@ -4,3 +4,4 @@ checks:
     - "privileged-container"
     - "non-existent-service-account"
     - "mismatching-selector"
+    - "latest-tag"

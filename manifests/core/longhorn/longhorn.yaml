@@ -4991,6 +4991,8 @@ spec:
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
+  annotations:
+    ignore-check.kube-linter.io/privileged-container: "Longhorn needs access to storage"
   labels:
     app.kubernetes.io/name: longhorn
     app.kubernetes.io/instance: longhorn
