@@ -136,7 +136,7 @@ serviceWeb:
 
   # -- Annotations for the DHCP service
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: pihole.homelab.local
+    external-dns.alpha.kubernetes.io/hostname: pihole-baxter.homelab.test
     # metallb.universe.tf/address-pool: network-services
     # metallb.universe.tf/allow-shared-ip: pihole-svc
 
@@ -268,7 +268,8 @@ topologySpreadConstraints: []
 affinity: {}
 
 # -- Administrator password when not using an existing secret (see below)
-adminPassword: "admin"
+# See admin section and create secret resource with key value
+adminPassword: ""
 
 # -- Use an existing secret for the admin password.
 admin:
@@ -397,11 +398,7 @@ dnsmasq:
   - 192.168.0.107     node4
   - 192.168.0.108     node5
   - 192.168.0.109     rhel0
-  - 192.168.0.110     omada
-  - 192.168.0.100     pve0
-
-  # - 192.168.0.3     host4
-  # - 192.168.0.4     host5
+  - 192.168.0.100     esx
 
   # -- Static DHCP config
   staticDhcpEntries: []

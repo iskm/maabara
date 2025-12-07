@@ -28,7 +28,7 @@ spec:
         app: jellyfin
     spec:
       containers:
-      - image: jellyfin/jellyfin:latest
+      - image: jellyfin/jellyfin:1.0 # version place holder 7 DEC 2025
         name: jellyfin
         resources: {}
         volumeMounts:

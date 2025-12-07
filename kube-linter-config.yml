@@ -1,0 +1,10 @@
+checks:
+  doNotAutoAddDefaults: true
+  include:
+    - "privileged-container"
+    - "non-existent-service-account"
+    - "mismatching-selector"
+    - "latest-tag"
+  ignorePaths:
+    - manifests/core/pihole/templates/tests/test-pihole-endpoint.yml
+    - manifests/services/gitea/templates/tests/test-http-connection.yaml
