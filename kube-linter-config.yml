@@ -6,5 +6,5 @@ checks:
     - "mismatching-selector"
     - "latest-tag"
   ignorePaths:
-    - core/pihole/templates/tests/test-pihole-endpoint.yml
-    - services/gitea/templates/tests/test-http-connection.yaml
+    - manifests/core/pihole/templates/tests/test-pihole-endpoint.yml
+    - manifests/services/gitea/templates/tests/test-http-connection.yaml
