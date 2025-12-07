@@ -25,10 +25,10 @@ jobs:
           directory: manifests
           # Adjust this to the location of kube-linter config you're using, or remove the setting if you'd like to use
           # the default config.
-          #config: sample/.kube-linter-config.yaml
+          config: kube-linter-config.yml
           # The following two settings make kube-linter produce scan analysis in SARIF format which would then be
           # made available in GitHub UI via upload-sarif action below.
-          #format: sarif
+          format: sarif
           #output-file: ../results/kube-linter.sarif
         # The following line prevents aborting the workflow immediately in case your files fail kube-linter checks.
         # This allows the following upload-sarif action to still upload the results to your GitHub repo.
