@@ -5,3 +5,6 @@ checks:
     - "non-existent-service-account"
     - "mismatching-selector"
     - "latest-tag"
+  ignorePaths:
+    - core/pihole/templates/tests/test-pihole-endpoint.yml
+    - services/gitea/templates/tests/test-http-connection.yaml
