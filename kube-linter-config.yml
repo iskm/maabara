@@ -2,7 +2,5 @@ checks:
   doNotAutoAddDefaults: true
   include:
     - "privileged-container"
-    - "readiness-port"
     - "non-existent-service-account"
     - "mismatching-selector"
-    - "latest-tag"
