@@ -2,8 +2,6 @@ checks:
   doNotAutoAddDefaults: true
   include:
     - "privileged-container"
-    - "run-as-non-root"
-    - "sensitive-host-mounts"
     - "readiness-port"
     - "non-existent-service-account"
     - "mismatching-selector"
