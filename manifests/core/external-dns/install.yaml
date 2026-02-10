@@ -9,8 +9,8 @@ kind: ClusterRole
 metadata:
   name: external-dns
 rules:
-- apiGroups: [""]
-  resources: ["services","endpoints","pods"]
+- apiGroups: ["", "discovery.k8s.io"]
+  resources: ["services","endpoints","pods","endpointslices"]
   verbs: ["get","watch","list"]
 - apiGroups: ["extensions","networking.k8s.io"]
   resources: ["ingresses"]
@@ -41,16 +41,16 @@ spec:
     type: Recreate
   selector:
     matchLabels:
-      app: external-dns
+      app: external-dns-0
   template:
     metadata:
       labels:
-        app: external-dns
+        app: external-dns-0
     spec:
       serviceAccountName: external-dns
       containers:
       - name: external-dns-0
-        image: registry.k8s.io/external-dns/external-dns:v0.17.0
+        image: registry.k8s.io/external-dns/external-dns:v0.20.0
         # If authentication is disabled and/or you didn't create
         # a secret, you can remove this block.
         envFrom:
@@ -72,7 +72,7 @@ spec:
         - --pihole-api-version=6
         # Change this to the actual address of your Pi-hole web server
         #- --pihole-server=http://pihole-web.default.svc.cluster.local
-        - --pihole-server=http://192.168.0.239
+        - --pihole-server=http://pihole2.homelab.test
       securityContext:
         fsGroup: 65534 # For ExternalDNS to be able to read Kubernetes token files
 ---
@@ -85,16 +85,16 @@ spec:
     type: Recreate
   selector:
     matchLabels:
-      app: external-dns
+      app: external-dns-1
   template:
     metadata:
       labels:
-        app: external-dns
+        app: external-dns-1
     spec:
       serviceAccountName: external-dns
       containers:
       - name: external-dns-1
-        image: registry.k8s.io/external-dns/external-dns:v0.17.0
+        image: registry.k8s.io/external-dns/external-dns:v0.20.0
         # If authentication is disabled and/or you didn't create
         # a secret, you can remove this block.
         envFrom:
