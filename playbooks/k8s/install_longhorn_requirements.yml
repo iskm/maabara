@@ -1,6 +1,6 @@
 ---
 - name: setup and manage nodes
-  hosts: k8s
+  hosts: all
   become: true
   vars_files:
     - ../../vars/packages.yml
@@ -16,4 +16,3 @@
         name: iscsid
         state: started
         enabled: true
-
