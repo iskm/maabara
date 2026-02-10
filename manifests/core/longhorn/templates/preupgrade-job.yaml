@@ -5,6 +5,7 @@ metadata:
   annotations:
     "helm.sh/hook": pre-upgrade
     "helm.sh/hook-delete-policy": hook-succeeded,before-hook-creation,hook-failed
+    ignore-check.kube-linter.io/privileged-container: "Needs privileged access for storage"
   name: longhorn-pre-upgrade
   namespace: {{ include "release_namespace" . }}
   labels: {{- include "longhorn.labels" . | nindent 4 }}
@@ -15,6 +16,8 @@ spec:
     metadata:
       name: longhorn-pre-upgrade
       labels: {{- include "longhorn.labels" . | nindent 8 }}
+      annotations:
+        ignore-check.kube-linter.io/privileged-container: "Needs privileged access for storage"
     spec:
       containers:
       - name: longhorn-pre-upgrade

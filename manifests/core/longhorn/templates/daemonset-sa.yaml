@@ -5,6 +5,8 @@ metadata:
     app: longhorn-manager
   name: longhorn-manager
   namespace: {{ include "release_namespace" . }}
+  annotations:
+    ignore-check.kube-linter.io/privileged-container: "Needs privileged access for storage"
 spec:
   selector:
     matchLabels:
@@ -15,6 +17,7 @@ spec:
         app: longhorn-manager
       {{- with .Values.annotations }}
       annotations:
+        ignore-check.kube-linter.io/privileged-container: "Needs privileged access for storage"
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
