@@ -87,15 +87,6 @@ Return the PostgreSQL database to create
 {{- end -}}
 
 {{/*
-Return true if PostgreSQL postgres user password has been provided
-*/}}
-{{- define "postgresql-ha.postgresqlPasswordProvided" -}}
-{{- if not (empty (coalesce ((.Values.global).postgresql).postgresPassword .Values.postgresql.postgresPassword) | default "") -}}
-    {{- true -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
 Return the Pgpool Admin username
 */}}
 {{- define "postgresql-ha.pgpoolAdminUsername" -}}
@@ -458,20 +449,4 @@ Return the path to the cert key file.
 */}}
 {{- define "postgresql-ha.postgresql.tlsCertKey" -}}
 {{- required "Certificate Key filename is required when TLS in enabled" .Values.postgresql.tls.certKeyFilename | printf "/opt/bitnami/postgresql/certs/%s" -}}
-{{- end -}}
-
-{{/*
-Get the readiness probe command
-*/}}
-{{- define "postgresql-ha.readinessProbeCommand" -}}
-{{- $block := index .context.Values .component }}
-{{- if eq .component "postgresql" -}}
-- |
-  exec pg_isready -U "postgres" {{- if $block.tls.enabled }} -d "sslcert={{ include "postgresql-ha.postgresql.tlsCert" .context }} sslkey={{ include "postgresql-ha.postgresql.tlsCertKey" .context }}"{{- end }} -h 127.0.0.1 -p {{ $block.containerPorts.postgresql }}
-{{- if contains "bitnami/" $block.image.repository }}
-  [ -f /opt/bitnami/postgresql/tmp/.initialized ] || [ -f /bitnami/postgresql/.initialized ]
-{{- end }}
-{{- else -}}
-- exec pg_isready -U "postgres" -h 127.0.0.1 -p {{ $block.containerPorts.postgresql }}
-{{- end }}
 {{- end -}}
