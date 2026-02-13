@@ -144,6 +144,7 @@ spec:
           lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.pgpool.lifecycleHooks "context" $) | nindent 12 }}
           {{- end }}
           {{- end }}
+          {{- $clusterDomain:= .Values.clusterDomain }}
           env:
             - name: BITNAMI_DEBUG
               value: {{ ternary "true" "false" (or .Values.pgpool.image.debug .Values.diagnosticMode.enabled) | quote }}
@@ -159,8 +160,12 @@ spec:
                   name: {{ include "postgresql-ha.pgpoolCustomUsersSecretName" . }}
                   key: passwords
             {{- end }}
+            - name: REPMGR_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
             - name: PGPOOL_BACKEND_NODES
-              value: {{ range $e, $i := until $postgresqlReplicaCount }}{{ $i }}:{{ $postgresqlFullname }}-{{ $i }}.{{ $postgresqlHeadlessServiceName }}:{{ $postgresalContainerPort }},{{ end }}
+              value: {{ range $e, $i := until $postgresqlReplicaCount }}{{ $i }}:{{ $postgresqlFullname }}-{{ $i }}.{{ $postgresqlHeadlessServiceName }}.$(REPMGR_NAMESPACE).svc.{{ $clusterDomain }}:{{ $postgresalContainerPort }},{{ end }}
             - name: PGPOOL_SR_CHECK_USER
               value: {{ (include "postgresql-ha.pgoolSrCheckUsername" .) | quote }}
             {{- if .Values.pgpool.usePasswordFiles }}
@@ -222,7 +227,11 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "postgresql-ha.postgresqlSecretName" . }}
+                  {{- if not (eq (include "postgresql-ha.postgresqlUsername" .) "postgres") }} 
+                  key: postgres-password
+                  {{- else }}
                   key: password
+                  {{- end }}
             {{- end }}
             - name: PGPOOL_ADMIN_USERNAME
               value: {{ (include "postgresql-ha.pgpoolAdminUsername" .) | quote }}
@@ -240,6 +249,8 @@ spec:
               value: {{ .Values.pgpool.authenticationMethod | quote }}
             - name: PGPOOL_ENABLE_LOAD_BALANCING
               value: {{ ternary "yes" "no" .Values.pgpool.useLoadBalancing | quote }}
+            - name: PGPOOL_ENABLE_CONNECTION_CACHE
+              value: {{ ternary "yes" "no" .Values.pgpool.useConnectionCache | quote }}
             {{- if .Values.pgpool.useLoadBalancing }}
             - name: PGPOOL_DISABLE_LOAD_BALANCE_ON_WRITE
               value: {{ .Values.pgpool.disableLoadBalancingOnWrite | quote }}
@@ -248,6 +259,8 @@ spec:
               value: {{ ternary "yes" "no" .Values.pgpool.logConnections | quote }}
             - name: PGPOOL_ENABLE_LOG_HOSTNAME
               value: {{ ternary "yes" "no" .Values.pgpool.logHostname | quote }}
+            - name: PGPOOL_ENABLE_LOG_PCP_PROCESSES
+              value: {{ ternary "yes" "no" .Values.pgpool.logPcpProcesses | quote }}
             - name: PGPOOL_ENABLE_LOG_PER_NODE_STATEMENT
               value: {{ ternary "yes" "no" .Values.pgpool.logPerNodeStatement | quote }}
             {{- if .Values.pgpool.logLinePrefix }}
