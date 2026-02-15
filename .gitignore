@@ -7,3 +7,7 @@ dhcpd.conf.j2
 awx-operator
 ansible
 docs
+values.yml
+values.yaml
+production-issuer.yaml
+staging-issuer.yaml
