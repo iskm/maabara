@@ -1,0 +1,79 @@
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultConnection
+metadata:
+  name: vault
+  namespace: demo
+spec:
+  address: https://vault.homelab.test:8200
+  caCertSecretRef: vault-ca
+  skipTLSVerify: false
+  timeout: 10s
+---
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultAuth
+metadata:
+  name: demo-app
+  namespace: demo
+spec:
+  vaultConnectionRef: vault
+  method: kubernetes
+  mount: kubernetes-k3s
+  kubernetes:
+    role: demo-app
+    serviceAccount: demo-app
+    tokenExpirationSeconds: 600
+---
+apiVersion: secrets.hashicorp.com/v1beta1
+kind: VaultStaticSecret
+metadata:
+  name: demo-config
+  namespace: demo
+spec:
+  type: kv-v1
+  mount: kv
+  path: apps/demo/config
+  vaultAuthRef: demo-app
+  refreshAfter: 60s
+  destination:
+    create: true
+    name: demo-config
+    type: Opaque
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-app
+  namespace: demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demo-app
+  template:
+    metadata:
+      labels:
+        app: demo-app
+    spec:
+      serviceAccountName: demo-app
+      containers:
+        - name: app
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              set -eu
+              test -s /run/secrets/demo/username
+              test -s /run/secrets/demo/password
+              test -s /run/secrets/demo/api_key
+              echo "demo secret files are present"
+              sleep 3600
+          volumeMounts:
+            - name: demo-config
+              mountPath: /run/secrets/demo
+              readOnly: true
+      volumes:
+        - name: demo-config
+          secret:
+            secretName: demo-config
+            defaultMode: 0400
