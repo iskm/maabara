@@ -1,4 +1,4 @@
-FROM jenkins/jenkins@sha256:057fc64d47b4e20514768ee2264d200ba5c5a206f89b1f459a4dbe32b0692dbd
+FROM jenkins/jenkins@sha256:a92b7ccbf8ee32764df713c3fe1f0f891d221aadaa30656ad380cb669fb018e7
 USER root
 RUN apt-get update && apt-get install -y lsb-release ca-certificates curl && \
     install -m 0755 -d /etc/apt/keyrings && \
