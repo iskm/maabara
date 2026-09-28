@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run ansible-lint
-        uses: ansible/ansible-lint@v25.11.1
+        uses: ansible/ansible-lint@v25.12.2
         # optional (see below):
         with:
           args: "--profile min"
