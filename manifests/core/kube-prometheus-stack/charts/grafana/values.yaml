@@ -123,7 +123,7 @@ testFramework:
     # -- The Docker registry
     registry: docker.io
     repository: bats/bats
-    tag: "v1.4.1"
+    tag: "1.14.0"
   imagePullPolicy: IfNotPresent
   securityContext: {}
   containerSecurityContext: {}
