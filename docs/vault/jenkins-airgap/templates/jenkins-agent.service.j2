@@ -1,0 +1,28 @@
+[Unit]
+Description=Jenkins inbound agent container
+Wants=network-online.target
+After=network-online.target{{ ' docker.service' if container_engine == 'docker' else '' }}
+StartLimitIntervalSec=0
+{% if container_engine == 'docker' %}Requires=docker.service
+{% endif %}
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=10s
+TimeoutStartSec=120
+TimeoutStopSec=45
+EnvironmentFile={{ jenkins_agent_config_dir }}/agent-arguments.env
+ExecStartPre=-{{ agent_engine_path.stdout }} rm --force {{ jenkins_agent_container_name }}
+ExecStart={{ agent_engine_path.stdout }} run --rm --pull=never --init --name {{ jenkins_agent_container_name }} \
+  --env-file {{ jenkins_agent_config_dir }}/agent.env \
+  --volume {{ jenkins_agent_workdir }}:/home/jenkins/agent:Z \
+  --volume {{ jenkins_agent_config_dir }}/tls:/run/jenkins/tls:ro,Z \
+  --volume {{ jenkins_agent_config_dir }}/agent-secret:/run/jenkins/secret/agent-secret:ro,Z{% for bind_mount in jenkins_agent_extra_bind_mounts %} \
+  --volume {{ bind_mount.source }}:{{ bind_mount.target }}:{{ bind_mount.options | default('Z') }}{% endfor %} \
+  {{ jenkins_agent_image }} {{ jenkins_agent_command | join(' ') }}
+ExecStop=-{{ agent_engine_path.stdout }} stop --time 30 {{ jenkins_agent_container_name }}
+ExecStopPost=-{{ agent_engine_path.stdout }} rm --force {{ jenkins_agent_container_name }}
+
+[Install]
+WantedBy=multi-user.target

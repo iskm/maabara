@@ -1,0 +1,12 @@
+---
+all:
+  children:
+    jenkins_controller:
+      hosts:
+        jenkins-controller-01:
+          ansible_host: 192.0.2.10
+
+    jenkins_agents:
+      hosts:
+        jenkins-agent-01:
+          ansible_host: 192.0.2.20

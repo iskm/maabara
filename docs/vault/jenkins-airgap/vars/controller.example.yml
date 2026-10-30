@@ -1,0 +1,31 @@
+---
+# Copy this file, fill it in, and encrypt the copy with ansible-vault.
+container_engine: docker
+container_image_backend: auto
+
+# Use the exact fully qualified name in the internal registry.
+jenkins_controller_image: "registry.internal.example/jenkins/controller:lts-jdk21"
+jenkins_controller_image_pull_policy: missing
+
+# Leave all three empty for anonymous access. Encrypt this file if credentials
+# are supplied.
+container_registry_server: ""
+container_registry_username: ""
+container_registry_password: ""
+
+# Archive mode is an alternative: set pull policy to never and provide a file.
+jenkins_controller_image_archive: ""
+
+jenkins_controller_tls_certificate_file: "files/jenkins.homelab.test.fullchain.crt"
+jenkins_controller_tls_private_key_file: "files/jenkins.homelab.test.key"
+jenkins_controller_trusted_ca_files:
+  - alias: homelab-root
+    src: files/homelab-root-ca.crt
+
+jenkins_controller_keystore_password: "REPLACE-WITH-ANSIBLE-VAULT"
+jenkins_controller_url: "https://jenkins.homelab.test:8443"
+
+# Optional. Plugins must already be baked into the air-gapped image.
+jenkins_controller_jcasc_file: ""
+
+jenkins_controller_extra_bind_mounts: []

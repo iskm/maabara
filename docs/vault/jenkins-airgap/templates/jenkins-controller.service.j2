@@ -1,0 +1,27 @@
+[Unit]
+Description=Jenkins controller container
+Wants=network-online.target
+After=network-online.target{{ ' docker.service' if container_engine == 'docker' else '' }}
+StartLimitIntervalSec=0
+{% if container_engine == 'docker' %}Requires=docker.service
+{% endif %}
+
+[Service]
+Type=simple
+Restart=on-failure
+RestartSec=10s
+TimeoutStartSec=180
+TimeoutStopSec=90
+ExecStartPre=-{{ controller_engine_path.stdout }} rm --force {{ jenkins_controller_container_name }}
+ExecStart={{ controller_engine_path.stdout }} run --rm --pull=never --init --name {{ jenkins_controller_container_name }} \
+  --env-file {{ jenkins_controller_config_dir }}/controller.env \
+  --publish {{ jenkins_controller_host_port }}:{{ jenkins_controller_container_port }} \
+  --volume {{ jenkins_controller_home }}:/var/jenkins_home:Z \
+  --volume {{ jenkins_controller_config_dir }}/tls:/run/jenkins/tls:ro,Z{% for bind_mount in jenkins_controller_extra_bind_mounts %} \
+  --volume {{ bind_mount.source }}:{{ bind_mount.target }}:{{ bind_mount.options | default('Z') }}{% endfor %} \
+  {{ jenkins_controller_image }}
+ExecStop=-{{ controller_engine_path.stdout }} stop --time 60 {{ jenkins_controller_container_name }}
+ExecStopPost=-{{ controller_engine_path.stdout }} rm --force {{ jenkins_controller_container_name }}
+
+[Install]
+WantedBy=multi-user.target

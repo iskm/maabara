@@ -1,0 +1,518 @@
+---
+- name: Deploy an air-gapped Jenkins inbound agent container
+  hosts: jenkins_agents
+  become: true
+  gather_facts: true
+
+  vars:
+    container_engine: docker
+    # auto uses community.docker for Docker and the CLI fallback for Podman.
+    # Set cli explicitly only when the Docker modules cannot be used.
+    container_image_backend: auto
+    jenkins_agent_image: "registry.internal.example/jenkins/inbound-agent:ubi9"
+    jenkins_agent_image_archive: ""
+    # never: require a preloaded image; missing: pull only if absent; always: refresh it.
+    jenkins_agent_image_pull_policy: missing
+    container_registry_server: ""
+    container_registry_username: ""
+    container_registry_password: ""
+    jenkins_agent_registry_auth_dir: /run/jenkins-agent-registry-auth-ansible
+    jenkins_agent_container_name: "jenkins-agent-{{ inventory_hostname }}"
+
+    jenkins_agent_config_dir: /etc/jenkins-agent
+    jenkins_agent_workdir: /srv/jenkins/agent
+    jenkins_agent_image_cache_dir: /var/cache/jenkins-images
+    jenkins_agent_uid: 1000
+    jenkins_agent_gid: 1000
+
+    jenkins_controller_url: ""
+    jenkins_agent_name: "{{ inventory_hostname }}"
+    jenkins_agent_secret: ""
+    jenkins_agent_java_opts_extra: "-Djava.awt.headless=true"
+    jenkins_agent_command:
+      - -url
+      - "${JENKINS_CONTROLLER_URL_ARG}"
+      - -webSocket
+      - -secret
+      - "@/run/jenkins/secret/agent-secret"
+      - -name
+      - "${JENKINS_AGENT_NAME_ARG}"
+      - -workDir
+      - "${JENKINS_AGENT_WORKDIR_ARG}"
+
+    # Required local CA files on the Ansible control node.
+    jenkins_agent_trusted_ca_files: []
+    # Example:
+    # jenkins_agent_trusted_ca_files:
+    #   - alias: homelab-root
+    #     src: files/homelab-root-ca.crt
+
+    # Put this value in an Ansible Vault-encrypted vars file.
+    jenkins_agent_truststore_password: ""
+
+    jenkins_agent_extra_environment: {}
+    jenkins_agent_extra_bind_mounts: []
+    # Avoid mounting a Docker or Podman socket unless jobs explicitly require it.
+
+  pre_tasks:
+    - name: Validate agent inputs
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.os_family == "RedHat"
+          - ansible_facts.distribution_major_version in ["8", "9", "10"]
+          - container_engine in ["docker", "podman"]
+          - container_image_backend in ["auto", "modules", "cli"]
+          - not (container_image_backend == "modules" and container_engine != "docker")
+          - jenkins_agent_image | length > 0
+          - jenkins_agent_image_pull_policy in ["never", "missing", "always"]
+          - >-
+            not (jenkins_agent_image_archive | length > 0 and
+            jenkins_agent_image_pull_policy != "never")
+          - >-
+            (container_registry_username | length == 0 and
+            container_registry_password | length == 0) or
+            (container_registry_server | length > 0 and
+            container_registry_username | length > 0 and
+            container_registry_password | length > 0)
+          - jenkins_controller_url is match('^https://')
+          - jenkins_agent_name | length > 0
+          - jenkins_agent_secret | length > 0
+          - jenkins_agent_trusted_ca_files | length > 0
+          - jenkins_agent_truststore_password | length >= 12
+          - jenkins_agent_truststore_password is match('^[A-Za-z0-9._~-]+$')
+        fail_msg: >-
+          This play requires a RHEL/UBI-compatible 8+ host, docker or podman,
+          an inbound-agent image source, an HTTPS controller URL, agent
+          name/secret, trusted CA, and truststore password. Archive and
+          registry-pull modes are mutually exclusive. Registry server,
+          username, and password must either all be supplied or all be empty.
+    - name: Check trusted CA definitions
+      ansible.builtin.assert:
+        that:
+          - item.alias is match('^[A-Za-z0-9_.-]+$')
+          - item.src | length > 0
+        fail_msg: "Every trusted CA needs a simple alias and a local src path."
+      loop: "{{ jenkins_agent_trusted_ca_files }}"
+      loop_control:
+        label: "{{ item.alias | default('undefined') }}"
+
+  tasks:
+    - name: Install certificate and Java tooling from configured RHEL repositories
+      ansible.builtin.package:
+        name:
+          - ca-certificates
+          - java-21-openjdk-headless
+          - openssl
+          - python3-requests
+        state: present
+
+    - name: Locate the selected container engine
+      ansible.builtin.shell: "command -v {{ container_engine }}"
+      args:
+        executable: /bin/bash
+      register: agent_engine_path
+      changed_when: false
+
+    - name: Create agent directories
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: directory
+        owner: "{{ item.owner }}"
+        group: "{{ item.group }}"
+        mode: "{{ item.mode }}"
+      loop:
+        - path: "{{ jenkins_agent_config_dir }}"
+          owner: root
+          group: root
+          mode: "0750"
+        - path: "{{ jenkins_agent_config_dir }}/tls"
+          owner: root
+          group: "{{ jenkins_agent_gid }}"
+          mode: "0750"
+        - path: "{{ jenkins_agent_config_dir }}/ca"
+          owner: root
+          group: root
+          mode: "0755"
+        - path: "{{ jenkins_agent_workdir }}"
+          owner: "{{ jenkins_agent_uid }}"
+          group: "{{ jenkins_agent_gid }}"
+          mode: "0750"
+        - path: "{{ jenkins_agent_image_cache_dir }}"
+          owner: root
+          group: root
+          mode: "0750"
+
+    - name: Copy trusted CA certificates for the agent JVM
+      ansible.builtin.copy:
+        src: "{{ item.src }}"
+        dest: "{{ jenkins_agent_config_dir }}/ca/{{ item.alias }}.crt"
+        owner: root
+        group: "{{ jenkins_agent_gid }}"
+        mode: "0644"
+      loop: "{{ jenkins_agent_trusted_ca_files }}"
+      loop_control:
+        label: "{{ item.alias }}"
+      notify: Restart Jenkins agent
+
+    - name: Assemble the agent container PEM CA bundle
+      ansible.builtin.assemble:
+        src: "{{ jenkins_agent_config_dir }}/ca"
+        dest: "{{ jenkins_agent_config_dir }}/tls/ca-bundle.pem"
+        delimiter: "\n"
+        owner: root
+        group: "{{ jenkins_agent_gid }}"
+        mode: "0644"
+      notify: Restart Jenkins agent
+
+    - name: Install trusted CAs into the agent host trust store
+      ansible.builtin.copy:
+        src: "{{ item.src }}"
+        dest: "/etc/pki/ca-trust/source/anchors/jenkins-{{ item.alias }}.crt"
+        owner: root
+        group: root
+        mode: "0644"
+      loop: "{{ jenkins_agent_trusted_ca_files }}"
+      loop_control:
+        label: "{{ item.alias }}"
+      register: agent_host_ca_copy
+
+    - name: Refresh host CA trust before accessing an internal registry
+      ansible.builtin.command: update-ca-trust
+      when: agent_host_ca_copy.changed
+      changed_when: true
+
+    - name: Build the dedicated agent Java truststore
+      community.general.java_cert:
+        cert_path: "{{ jenkins_agent_config_dir }}/ca/{{ item.alias }}.crt"
+        cert_alias: "{{ item.alias }}"
+        keystore_path: "{{ jenkins_agent_config_dir }}/tls/truststore.jks"
+        keystore_pass: "{{ jenkins_agent_truststore_password }}"
+        keystore_create: true
+        keystore_type: JKS
+        trust_cacert: true
+        state: present
+        owner: root
+        group: "{{ jenkins_agent_gid }}"
+        mode: "0640"
+      loop: "{{ jenkins_agent_trusted_ca_files }}"
+      loop_control:
+        label: "{{ item.alias }}"
+      no_log: true
+      notify: Restart Jenkins agent
+
+    - name: Write the inbound-agent secret to a protected file
+      ansible.builtin.copy:
+        content: "{{ jenkins_agent_secret }}"
+        dest: "{{ jenkins_agent_config_dir }}/agent-secret"
+        owner: root
+        group: "{{ jenkins_agent_gid }}"
+        mode: "0640"
+      no_log: true
+      notify: Restart Jenkins agent
+
+    - name: Copy an optional air-gapped agent image archive
+      ansible.builtin.copy:
+        src: "{{ jenkins_agent_image_archive }}"
+        dest: "{{ jenkins_agent_image_cache_dir }}/{{ jenkins_agent_image_archive | basename }}"
+        owner: root
+        group: root
+        mode: "0640"
+      when: jenkins_agent_image_archive | length > 0
+      register: agent_archive_copy
+
+    - name: Select the agent image-management backend
+      ansible.builtin.set_fact:
+        agent_use_docker_modules: >-
+          {{
+            container_engine == "docker" and
+            container_image_backend in ["auto", "modules"]
+          }}
+
+    - name: Inspect the agent image with community.docker
+      community.docker.docker_image_info:
+        name: "{{ jenkins_agent_image }}"
+      when: agent_use_docker_modules | bool
+      register: agent_docker_image_info
+
+    - name: Inspect the agent image with the CLI fallback
+      ansible.builtin.command:
+        argv:
+          - "{{ agent_engine_path.stdout }}"
+          - image
+          - inspect
+          - "{{ jenkins_agent_image }}"
+      when: not agent_use_docker_modules | bool
+      register: agent_cli_image_info
+      changed_when: false
+      failed_when: false
+
+    - name: Record whether the agent image is present
+      ansible.builtin.set_fact:
+        agent_image_present: >-
+          {{
+            (agent_docker_image_info.images | length > 0)
+            if agent_use_docker_modules | bool
+            else (agent_cli_image_info.rc == 0)
+          }}
+
+    - name: Load the agent archive with community.docker
+      community.docker.docker_image_load:
+        path: "{{ jenkins_agent_image_cache_dir }}/{{ jenkins_agent_image_archive | basename }}"
+      when:
+        - agent_use_docker_modules | bool
+        - jenkins_agent_image_archive | length > 0
+        - agent_archive_copy.changed or not agent_image_present | bool
+      notify: Restart Jenkins agent
+
+    - name: Load the agent archive with the CLI fallback
+      ansible.builtin.command:
+        argv:
+          - "{{ agent_engine_path.stdout }}"
+          - load
+          - --input
+          - "{{ jenkins_agent_image_cache_dir }}/{{ jenkins_agent_image_archive | basename }}"
+      when:
+        - not agent_use_docker_modules | bool
+        - jenkins_agent_image_archive | length > 0
+        - agent_archive_copy.changed or not agent_image_present | bool
+      changed_when: true
+      notify: Restart Jenkins agent
+
+    - name: Decide whether the agent image needs a registry pull
+      ansible.builtin.set_fact:
+        agent_registry_pull_required: >-
+          {{
+            jenkins_agent_image_archive | length == 0 and
+            (
+              jenkins_agent_image_pull_policy == "always" or
+              (
+                jenkins_agent_image_pull_policy == "missing" and
+                not agent_image_present | bool
+              )
+            )
+          }}
+
+    - name: Pull the agent image anonymously with community.docker
+      community.docker.docker_image_pull:
+        name: "{{ jenkins_agent_image }}"
+        pull: "{{ 'always' if jenkins_agent_image_pull_policy == 'always' else 'not_present' }}"
+      when:
+        - agent_use_docker_modules | bool
+        - agent_registry_pull_required | bool
+        - container_registry_username | length == 0
+      notify: Restart Jenkins agent
+
+    - name: Pull the agent image anonymously with the CLI fallback
+      ansible.builtin.command:
+        argv:
+          - "{{ agent_engine_path.stdout }}"
+          - pull
+          - "{{ jenkins_agent_image }}"
+      when:
+        - not agent_use_docker_modules | bool
+        - agent_registry_pull_required | bool
+        - container_registry_username | length == 0
+      changed_when: true
+      notify: Restart Jenkins agent
+
+    - name: Pull the agent image with community.docker authentication
+      when:
+        - agent_use_docker_modules | bool
+        - agent_registry_pull_required | bool
+        - container_registry_username | length > 0
+      block:
+        - name: Authenticate community.docker to the internal registry
+          community.docker.docker_login:
+            registry_url: "{{ container_registry_server }}"
+            username: "{{ container_registry_username }}"
+            password: "{{ container_registry_password }}"
+            reauthorize: true
+          no_log: true
+
+        - name: Pull the authenticated agent image with community.docker
+          community.docker.docker_image_pull:
+            name: "{{ jenkins_agent_image }}"
+            pull: "{{ 'always' if jenkins_agent_image_pull_policy == 'always' else 'not_present' }}"
+          notify: Restart Jenkins agent
+      always:
+        - name: Remove the temporary community.docker registry login
+          community.docker.docker_login:
+            registry_url: "{{ container_registry_server }}"
+            state: absent
+          no_log: true
+
+    - name: Pull the agent image with CLI-fallback credentials
+      when:
+        - not agent_use_docker_modules | bool
+        - agent_registry_pull_required | bool
+        - container_registry_username | length > 0
+      block:
+        - name: Create the temporary agent registry-auth directory
+          ansible.builtin.file:
+            path: "{{ jenkins_agent_registry_auth_dir }}"
+            state: directory
+            owner: root
+            group: root
+            mode: "0700"
+
+        - name: Authenticate Docker to the internal registry
+          ansible.builtin.command:
+            argv:
+              - "{{ agent_engine_path.stdout }}"
+              - --config
+              - "{{ jenkins_agent_registry_auth_dir }}"
+              - login
+              - --username
+              - "{{ container_registry_username }}"
+              - --password-stdin
+              - "{{ container_registry_server }}"
+            stdin: "{{ container_registry_password }}"
+            stdin_add_newline: true
+          when: container_engine == "docker"
+          changed_when: false
+          no_log: true
+
+        - name: Authenticate Podman to the internal registry
+          ansible.builtin.command:
+            argv:
+              - "{{ agent_engine_path.stdout }}"
+              - login
+              - --authfile
+              - "{{ jenkins_agent_registry_auth_dir }}/auth.json"
+              - --username
+              - "{{ container_registry_username }}"
+              - --password-stdin
+              - "{{ container_registry_server }}"
+            stdin: "{{ container_registry_password }}"
+            stdin_add_newline: true
+          when: container_engine == "podman"
+          changed_when: false
+          no_log: true
+
+        - name: Pull the authenticated agent image with Docker
+          ansible.builtin.command:
+            argv:
+              - "{{ agent_engine_path.stdout }}"
+              - --config
+              - "{{ jenkins_agent_registry_auth_dir }}"
+              - pull
+              - "{{ jenkins_agent_image }}"
+          when: container_engine == "docker"
+          changed_when: true
+          notify: Restart Jenkins agent
+
+        - name: Pull the authenticated agent image with Podman
+          ansible.builtin.command:
+            argv:
+              - "{{ agent_engine_path.stdout }}"
+              - pull
+              - --authfile
+              - "{{ jenkins_agent_registry_auth_dir }}/auth.json"
+              - "{{ jenkins_agent_image }}"
+          when: container_engine == "podman"
+          changed_when: true
+          notify: Restart Jenkins agent
+      always:
+        - name: Remove temporary agent registry credentials
+          ansible.builtin.file:
+            path: "{{ jenkins_agent_registry_auth_dir }}"
+            state: absent
+          no_log: true
+
+    - name: Verify the agent image with community.docker
+      community.docker.docker_image_info:
+        name: "{{ jenkins_agent_image }}"
+      when: agent_use_docker_modules | bool
+      register: agent_final_docker_image_info
+
+    - name: Confirm the community.docker image lookup succeeded
+      ansible.builtin.assert:
+        that: agent_final_docker_image_info.images | length == 1
+        fail_msg: "The requested agent image is not present after image management."
+      when: agent_use_docker_modules | bool
+
+    - name: Verify the agent image with the CLI fallback
+      ansible.builtin.command:
+        argv:
+          - "{{ agent_engine_path.stdout }}"
+          - image
+          - inspect
+          - "{{ jenkins_agent_image }}"
+      when: not agent_use_docker_modules | bool
+      changed_when: false
+
+    - name: Render the agent container environment
+      ansible.builtin.template:
+        src: templates/jenkins-agent.env.j2
+        dest: "{{ jenkins_agent_config_dir }}/agent.env"
+        owner: root
+        group: root
+        mode: "0600"
+      no_log: true
+      notify: Restart Jenkins agent
+
+    - name: Render the non-secret agent command arguments
+      ansible.builtin.template:
+        src: templates/jenkins-agent-arguments.env.j2
+        dest: "{{ jenkins_agent_config_dir }}/agent-arguments.env"
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Restart Jenkins agent
+
+    - name: Install the Jenkins agent systemd unit
+      ansible.builtin.template:
+        src: templates/jenkins-agent.service.j2
+        dest: /etc/systemd/system/jenkins-agent.service
+        owner: root
+        group: root
+        mode: "0644"
+      notify:
+        - Reload systemd
+        - Restart Jenkins agent
+
+    - name: Apply trust and service handlers before startup
+      ansible.builtin.meta: flush_handlers
+
+    - name: Enable and start the Jenkins agent
+      ansible.builtin.systemd_service:
+        name: jenkins-agent.service
+        enabled: true
+        state: started
+        daemon_reload: true
+
+    - name: Inspect the running agent with community.docker
+      community.docker.docker_container_info:
+        name: "{{ jenkins_agent_container_name }}"
+      when: agent_use_docker_modules | bool
+      register: agent_docker_container_info
+      retries: 12
+      delay: 5
+      until: >-
+        agent_docker_container_info.exists and
+        agent_docker_container_info.container.State.Running | bool
+
+    - name: Confirm the agent container remains running with the CLI fallback
+      ansible.builtin.command:
+        argv:
+          - "{{ agent_engine_path.stdout }}"
+          - inspect
+          - --format
+          - "{{ '{{.State.Running}}' }}"
+          - "{{ jenkins_agent_container_name }}"
+      when: not agent_use_docker_modules | bool
+      register: agent_running
+      changed_when: false
+      retries: 12
+      delay: 5
+      until: agent_running.stdout | trim == "true"
+
+  handlers:
+    - name: Reload systemd
+      ansible.builtin.systemd_service:
+        daemon_reload: true
+
+    - name: Restart Jenkins agent
+      ansible.builtin.systemd_service:
+        name: jenkins-agent.service
+        state: restarted

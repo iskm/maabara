@@ -1,0 +1,28 @@
+---
+# Copy this file, fill it in, and encrypt the copy with ansible-vault.
+container_engine: docker
+container_image_backend: auto
+
+# This image must have the Jenkins inbound-agent entrypoint and a compatible JDK.
+jenkins_agent_image: "registry.internal.example/jenkins/inbound-agent:ubi9"
+jenkins_agent_image_pull_policy: missing
+
+# Leave all three empty for anonymous access. Encrypt this file if credentials
+# are supplied.
+container_registry_server: ""
+container_registry_username: ""
+container_registry_password: ""
+
+# Archive mode is an alternative: set pull policy to never and provide a file.
+jenkins_agent_image_archive: ""
+
+jenkins_controller_url: "https://jenkins.homelab.test:8443"
+jenkins_agent_name: "ubi9-agent-01"
+jenkins_agent_secret: "REPLACE-WITH-ANSIBLE-VAULT"
+
+jenkins_agent_trusted_ca_files:
+  - alias: homelab-root
+    src: files/homelab-root-ca.crt
+
+jenkins_agent_truststore_password: "REPLACE-WITH-ANSIBLE-VAULT"
+jenkins_agent_extra_bind_mounts: []
