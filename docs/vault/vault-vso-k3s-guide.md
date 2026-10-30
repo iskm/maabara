@@ -5,7 +5,7 @@ This guide documents the working setup in the homelab:
 | Item | Value |
 |---|---|
 | k3s API used by Vault auth | `https://192.168.2.12:6443` |
-| Vault | `https://vault.homelab.test:8200` |
+| Vault | `https://vault1.homelab.test:8200` |
 | Secret style | Vault KV v1 synced by Vault Secrets Operator |
 | Demo namespace | `demo` |
 | Demo service account | `demo-app` |
@@ -65,7 +65,7 @@ You can reach:
 
 ```text
 https://192.168.2.12:6443
-https://vault.homelab.test:8200
+https://vault1.homelab.test:8200
 ```
 
 You also need the CA that issued Vault's HTTPS certificate. In this lab that is the OPNsense CA.
@@ -87,7 +87,7 @@ The file must be PEM:
 ## 1. Set variables
 
 ```bash
-export VAULT_ADDR="https://vault.homelab.test:8200"
+export VAULT_ADDR="https://vault1.homelab.test:8200"
 export K8S_HOST="https://192.168.2.12:6443"
 export K8S_AUTH_PATH="kubernetes-k3s"
 export APP_NAMESPACE="demo"
@@ -287,7 +287,7 @@ metadata:
   name: vault
   namespace: demo
 spec:
-  address: https://vault.homelab.test:8200
+  address: https://vault1.homelab.test:8200
   caCertSecretRef: vault-ca
   skipTLSVerify: false
   timeout: 10s
@@ -593,7 +593,7 @@ x509: certificate signed by unknown authority
 That was separate from VSO. The CLI just did not trust the CA yet:
 
 ```bash
-export VAULT_ADDR="https://vault.homelab.test:8200"
+export VAULT_ADDR="https://vault1.homelab.test:8200"
 export VAULT_CACERT="./vault-ca.crt"
 vault status
 ```
@@ -698,7 +698,7 @@ Work from the bottom up:
 1. Can a k3s node reach Vault over HTTPS?
 
    ```bash
-   curl -vk https://vault.homelab.test:8200/v1/sys/health
+   curl -vk https://vault1.homelab.test:8200/v1/sys/health
    ```
 
 2. Can a pod reach Vault over HTTPS?

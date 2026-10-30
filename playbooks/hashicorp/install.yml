@@ -41,6 +41,7 @@
             pkg:
               - terraform
               - packer
+              - vault
 
         - name: verify terraform works
           ansible.builtin.command:

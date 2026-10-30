@@ -6,8 +6,8 @@ dhcpd.conf.j2
 !roles/github_runner
 awx-operator
 ansible
-docs
 values.yml
 values.yaml
 production-issuer.yaml
 staging-issuer.yaml
+certs

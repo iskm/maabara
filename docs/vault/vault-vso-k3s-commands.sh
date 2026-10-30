@@ -2,19 +2,19 @@
 set -euo pipefail
 
 # Run this from a workstation that has kubectl, helm, and vault configured.
-# It assumes k3s API is reachable at https://k3s1.homelab.test:6443 and Vault
-# is reachable at https://vault.homelab.test:8200.
+# It assumes k3s API is reachable at https://192.168.2.12:6443 and Vault
+# is reachable at https://vault1.homelab.test:8200.
 
-export VAULT_ADDR="${VAULT_ADDR:-https://vault.homelab.test:8200}"
+export VAULT_ADDR="${VAULT_ADDR:-https://vault.homelab.test}"
 # Use a Kubernetes API name/IP that is present in the k3s API certificate SAN.
 # In this lab, k3s1.homelab.test resolves correctly but is not in the cert SAN;
 # 192.168.2.12 is in the cert SAN.
-export K8S_HOST="${K8S_HOST:-https://192.168.2.12:6443}"
-export K8S_AUTH_PATH="${K8S_AUTH_PATH:-kubernetes-k3s}"
+export K8S_HOST="${K8S_HOST:-https://k8s.homelab.test:6443}"
+export K8S_AUTH_PATH="${K8S_AUTH_PATH:-kubernetes-k8s}"
 export APP_NAMESPACE="${APP_NAMESPACE:-demo}"
 export APP_SERVICE_ACCOUNT="${APP_SERVICE_ACCOUNT:-demo-app}"
 export VAULT_ROLE="${VAULT_ROLE:-demo-app}"
-export VAULT_POLICY="${VAULT_POLICY:-k3s-demo-app}"
+export VAULT_POLICY="${VAULT_POLICY:-k8s-demo-app}"
 export KV_MOUNT="${KV_MOUNT:-kv}"
 export KV_PATH="${KV_PATH:-apps/demo/config}"
 export VAULT_CA_FILE="${VAULT_CA_FILE:-./vault-ca.crt}"
@@ -31,9 +31,9 @@ vault status
 
 echo "Extracting the k3s API CA certificate..."
 kubectl config view --raw \
-  -o jsonpath='{.clusters[0].cluster.certificate-authority-data}' \
-  | base64 -d > k3s-ca.crt
-openssl x509 -in k3s-ca.crt -noout -subject -issuer
+  -o jsonpath='{.clusters[1].cluster.certificate-authority-data}' \
+  | base64 -d > k8s-ca.crt
+openssl x509 -in k8s-ca.crt -noout -subject -issuer
 
 echo "Creating the application namespace and service account..."
 kubectl create namespace "${APP_NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
@@ -68,7 +68,7 @@ fi
 vault write "auth/${K8S_AUTH_PATH}/config" \
   token_reviewer_jwt="${TOKEN_REVIEWER_JWT}" \
   kubernetes_host="${K8S_HOST}" \
-  kubernetes_ca_cert=@k3s-ca.crt \
+  kubernetes_ca_cert=@k8s-ca.crt \
   disable_iss_validation=true
 
 echo "Creating a KV v1 mount and demo secret in Vault..."
@@ -107,7 +107,7 @@ kubectl -n vault-secrets-operator rollout status deploy/vault-secrets-operator-c
 
 echo "Creating the Vault CA secret for VSO..."
 if [ ! -s "${VAULT_CA_FILE}" ]; then
-  echo "Missing ${VAULT_CA_FILE}. Put the CA that issued https://vault.homelab.test there, then rerun this section." >&2
+  echo "Missing ${VAULT_CA_FILE}. Put the CA that issued ${VAULT_ADDR} there, then rerun this section." >&2
   exit 1
 fi
 openssl x509 -in "${VAULT_CA_FILE}" -noout -subject -issuer

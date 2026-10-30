@@ -4,7 +4,7 @@ metadata:
   name: vault
   namespace: demo
 spec:
-  address: https://vault.homelab.test:8200
+  address: https://vault.homelab.test
   caCertSecretRef: vault-ca
   skipTLSVerify: false
   timeout: 10s
@@ -17,7 +17,7 @@ metadata:
 spec:
   vaultConnectionRef: vault
   method: kubernetes
-  mount: kubernetes-k3s
+  mount: kubernetes-k8s
   kubernetes:
     role: demo-app
     serviceAccount: demo-app
