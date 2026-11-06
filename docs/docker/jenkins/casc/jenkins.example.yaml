@@ -1,0 +1,10 @@
+jenkins:
+  systemMessage: "Managed by Jenkins Configuration as Code"
+  numExecutors: 0
+  mode: EXCLUSIVE
+  slaveAgentPort: -1
+
+# Add plugin-specific configuration only after installing the matching plugin
+# version in the image and validating the export in a non-production controller.
+# Keep credentials outside Git and reference environment variables or Jenkins
+# credential providers instead of placing secret values in this file.
